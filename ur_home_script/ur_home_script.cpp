@@ -9,7 +9,7 @@ int main(int argc, char* argv[]){
         robot_ip = input.getCmdOption("--robot_ip");
     }
     else{
-        robot_ip = "0.0.0.0";
+        robot_ip = "192.168.2.20";
     }
 
     // Initialize Control Interface:
