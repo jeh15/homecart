@@ -1,4 +1,4 @@
-# homecart
+# Homecart
 ## UR Sim Instrutions:
 * Click on Hamburger Icon in top right corner and move to settings.
 * Enable remotere control
