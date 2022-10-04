@@ -48,10 +48,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/orl/repository/homecart/ur_sim
+CMAKE_SOURCE_DIR = /home/orl/repository/homecart/ur_home_script
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/orl/repository/homecart/ur_sim/build
+CMAKE_BINARY_DIR = /home/orl/repository/homecart/ur_home_script/build
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -80,9 +80,9 @@ edit_cache/fast: edit_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/orl/repository/homecart/ur_sim/build/CMakeFiles /home/orl/repository/homecart/ur_sim/build/CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/orl/repository/homecart/ur_home_script/build/CMakeFiles /home/orl/repository/homecart/ur_home_script/build/CMakeFiles/progress.marks
 	$(MAKE) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/orl/repository/homecart/ur_sim/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/orl/repository/homecart/ur_home_script/build/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -111,44 +111,44 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named ur_sim_home_script
+# Target rules for targets named ur_home_script
 
 # Build rule for target.
-ur_sim_home_script: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 ur_sim_home_script
-.PHONY : ur_sim_home_script
+ur_home_script: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 ur_home_script
+.PHONY : ur_home_script
 
 # fast build rule for target.
-ur_sim_home_script/fast:
-	$(MAKE) -f CMakeFiles/ur_sim_home_script.dir/build.make CMakeFiles/ur_sim_home_script.dir/build
-.PHONY : ur_sim_home_script/fast
+ur_home_script/fast:
+	$(MAKE) -f CMakeFiles/ur_home_script.dir/build.make CMakeFiles/ur_home_script.dir/build
+.PHONY : ur_home_script/fast
 
-ur_sim_home_script.o: ur_sim_home_script.cpp.o
+ur_home_script.o: ur_home_script.cpp.o
 
-.PHONY : ur_sim_home_script.o
+.PHONY : ur_home_script.o
 
 # target to build an object file
-ur_sim_home_script.cpp.o:
-	$(MAKE) -f CMakeFiles/ur_sim_home_script.dir/build.make CMakeFiles/ur_sim_home_script.dir/ur_sim_home_script.cpp.o
-.PHONY : ur_sim_home_script.cpp.o
+ur_home_script.cpp.o:
+	$(MAKE) -f CMakeFiles/ur_home_script.dir/build.make CMakeFiles/ur_home_script.dir/ur_home_script.cpp.o
+.PHONY : ur_home_script.cpp.o
 
-ur_sim_home_script.i: ur_sim_home_script.cpp.i
+ur_home_script.i: ur_home_script.cpp.i
 
-.PHONY : ur_sim_home_script.i
+.PHONY : ur_home_script.i
 
 # target to preprocess a source file
-ur_sim_home_script.cpp.i:
-	$(MAKE) -f CMakeFiles/ur_sim_home_script.dir/build.make CMakeFiles/ur_sim_home_script.dir/ur_sim_home_script.cpp.i
-.PHONY : ur_sim_home_script.cpp.i
+ur_home_script.cpp.i:
+	$(MAKE) -f CMakeFiles/ur_home_script.dir/build.make CMakeFiles/ur_home_script.dir/ur_home_script.cpp.i
+.PHONY : ur_home_script.cpp.i
 
-ur_sim_home_script.s: ur_sim_home_script.cpp.s
+ur_home_script.s: ur_home_script.cpp.s
 
-.PHONY : ur_sim_home_script.s
+.PHONY : ur_home_script.s
 
 # target to generate assembly for a file
-ur_sim_home_script.cpp.s:
-	$(MAKE) -f CMakeFiles/ur_sim_home_script.dir/build.make CMakeFiles/ur_sim_home_script.dir/ur_sim_home_script.cpp.s
-.PHONY : ur_sim_home_script.cpp.s
+ur_home_script.cpp.s:
+	$(MAKE) -f CMakeFiles/ur_home_script.dir/build.make CMakeFiles/ur_home_script.dir/ur_home_script.cpp.s
+.PHONY : ur_home_script.cpp.s
 
 # Help Target
 help:
@@ -158,10 +158,10 @@ help:
 	@echo "... depend"
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
-	@echo "... ur_sim_home_script"
-	@echo "... ur_sim_home_script.o"
-	@echo "... ur_sim_home_script.i"
-	@echo "... ur_sim_home_script.s"
+	@echo "... ur_home_script"
+	@echo "... ur_home_script.o"
+	@echo "... ur_home_script.i"
+	@echo "... ur_home_script.s"
 .PHONY : help
 
 

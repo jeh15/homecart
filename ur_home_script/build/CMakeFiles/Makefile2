@@ -44,16 +44,16 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/orl/repository/homecart/ur_sim
+CMAKE_SOURCE_DIR = /home/orl/repository/homecart/ur_home_script
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/orl/repository/homecart/ur_sim/build
+CMAKE_BINARY_DIR = /home/orl/repository/homecart/ur_home_script/build
 
 #=============================================================================
 # Directory level rules for the build root directory
 
 # The main recursive "all" target.
-all: CMakeFiles/ur_sim_home_script.dir/all
+all: CMakeFiles/ur_home_script.dir/all
 
 .PHONY : all
 
@@ -63,36 +63,36 @@ preinstall:
 .PHONY : preinstall
 
 # The main recursive "clean" target.
-clean: CMakeFiles/ur_sim_home_script.dir/clean
+clean: CMakeFiles/ur_home_script.dir/clean
 
 .PHONY : clean
 
 #=============================================================================
-# Target rules for target CMakeFiles/ur_sim_home_script.dir
+# Target rules for target CMakeFiles/ur_home_script.dir
 
 # All Build rule for target.
-CMakeFiles/ur_sim_home_script.dir/all:
-	$(MAKE) -f CMakeFiles/ur_sim_home_script.dir/build.make CMakeFiles/ur_sim_home_script.dir/depend
-	$(MAKE) -f CMakeFiles/ur_sim_home_script.dir/build.make CMakeFiles/ur_sim_home_script.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/orl/repository/homecart/ur_sim/build/CMakeFiles --progress-num=1,2 "Built target ur_sim_home_script"
-.PHONY : CMakeFiles/ur_sim_home_script.dir/all
+CMakeFiles/ur_home_script.dir/all:
+	$(MAKE) -f CMakeFiles/ur_home_script.dir/build.make CMakeFiles/ur_home_script.dir/depend
+	$(MAKE) -f CMakeFiles/ur_home_script.dir/build.make CMakeFiles/ur_home_script.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/orl/repository/homecart/ur_home_script/build/CMakeFiles --progress-num=1,2 "Built target ur_home_script"
+.PHONY : CMakeFiles/ur_home_script.dir/all
 
 # Build rule for subdir invocation for target.
-CMakeFiles/ur_sim_home_script.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/orl/repository/homecart/ur_sim/build/CMakeFiles 2
-	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/ur_sim_home_script.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/orl/repository/homecart/ur_sim/build/CMakeFiles 0
-.PHONY : CMakeFiles/ur_sim_home_script.dir/rule
+CMakeFiles/ur_home_script.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/orl/repository/homecart/ur_home_script/build/CMakeFiles 2
+	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/ur_home_script.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/orl/repository/homecart/ur_home_script/build/CMakeFiles 0
+.PHONY : CMakeFiles/ur_home_script.dir/rule
 
 # Convenience name for target.
-ur_sim_home_script: CMakeFiles/ur_sim_home_script.dir/rule
+ur_home_script: CMakeFiles/ur_home_script.dir/rule
 
-.PHONY : ur_sim_home_script
+.PHONY : ur_home_script
 
 # clean rule for target.
-CMakeFiles/ur_sim_home_script.dir/clean:
-	$(MAKE) -f CMakeFiles/ur_sim_home_script.dir/build.make CMakeFiles/ur_sim_home_script.dir/clean
-.PHONY : CMakeFiles/ur_sim_home_script.dir/clean
+CMakeFiles/ur_home_script.dir/clean:
+	$(MAKE) -f CMakeFiles/ur_home_script.dir/build.make CMakeFiles/ur_home_script.dir/clean
+.PHONY : CMakeFiles/ur_home_script.dir/clean
 
 #=============================================================================
 # Special targets to cleanup operation of make.
