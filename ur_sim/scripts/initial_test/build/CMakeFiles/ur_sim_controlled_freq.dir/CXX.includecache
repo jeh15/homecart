@@ -1,0 +1,22 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/orl/repository/homecart/ur_sim/scripts/ur_sim_controlled_freq.cpp
+ur_rtde/rtde_receive_interface.h
+-
+ur_rtde/rtde_control_interface.h
+-
+chrono
+-
+iostream
+-
+vector
+-
+threads.h
+-
+

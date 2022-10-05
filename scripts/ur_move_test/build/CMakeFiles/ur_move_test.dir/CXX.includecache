@@ -1,0 +1,24 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/orl/repository/homecart/scripts/ur_move_test/ur_move_test.cpp
+ur_rtde/rtde_receive_interface.h
+-
+ur_rtde/rtde_control_interface.h
+-
+chrono
+-
+iostream
+-
+vector
+-
+threads.h
+-
+math.h
+-
+
