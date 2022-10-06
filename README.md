@@ -8,6 +8,6 @@
 * In a separate terminal navigate to the ``/ur_sim/scripts`` folder and run your code
 
 *Note:*
-* Test all code on the ``ur_sim`` before running it on the hardware.
+* Test all code with ``ur_sim`` before running it on the hardware.
 * Code that will be deployed on the hardware should be contained in the ``/scripts`` folder and in its own subdirectory.
 * Code that will be used in the ``ur_sim`` should be contained in the ``/ur_sim/scripts`` folder and in its own subdirectory.
