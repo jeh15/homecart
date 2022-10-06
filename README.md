@@ -5,7 +5,12 @@
 * Click on Hamburger Icon in top right corner and move to settings.
 * Enable remotere control
 * Naviagte back to main menu and change local control to remote control 
-* In a separate terminal navigate to the ``/scripts`` folder and run your code
+* In a separate terminal navigate to the ``/ur_sim/scripts`` folder and run your code
 
 *Note:*
-Your code should be contained in the ``/scripts`` folder and in its own subdirectory.
+
+Test all code on the ``ur_sim`` before running it on the hardware.
+
+Code that will be deployed on the hardware should be contained in the ``/scripts`` folder and in its own subdirectory.
+
+Code that will be used in the ``ur_sim`` should be contained in the ``/ur_sim/scripts`` folder and in its own subdirectory.
