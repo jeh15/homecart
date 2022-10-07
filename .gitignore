@@ -45,3 +45,6 @@
 *.exe
 *.out
 *.app
+
+# Ignore images used for README.md
+imgs/
