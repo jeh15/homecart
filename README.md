@@ -17,9 +17,9 @@ Code Style Guide:
 
 Use the same conventions as documented:
 
-  Python: https://google.github.io/styleguide/pyguide.html
+  * Python: https://google.github.io/styleguide/pyguide.html
   
-  C++:    https://google.github.io/styleguide/cppguide.html
+  * C++:    https://google.github.io/styleguide/cppguide.html
   
 ### Naming Convention reference:
 ![Naming Reference](/imgs/naming_convention_reference.png)
