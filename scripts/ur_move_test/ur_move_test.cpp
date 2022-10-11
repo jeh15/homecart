@@ -28,10 +28,10 @@ int main(int argc, char* argv[]){
     // Parameters:
     double velocity = 0.1;
     double acceleration = 0.1;
-    double dt = 1.0 / 100; // 10ms
+    double dt = 1.0 / 500; // 2ms
     double lookahead_time = 0.1;
-    double gain = 600;
-    constexpr auto target_freq = std::chrono::milliseconds(10);
+    double gain = 500;
+    constexpr auto target_freq = std::chrono::milliseconds(2);
     std::vector<double> initial_pose = rtde_receive.getActualTCPPose();
 
     // Move to Initial Position:
@@ -41,7 +41,7 @@ int main(int argc, char* argv[]){
     std::this_thread::sleep_for(target_freq);
 
     // Follow Circle Trajectory:
-    for(unsigned int i=0; i<2500; i++){
+    for(unsigned int i=0; i<2000; i++){
         //
         auto start = std::chrono::high_resolution_clock::now();
 
