@@ -1,0 +1,3 @@
+[submodule "drake-schunk-driver"]
+	path = drake-schunk-driver
+	url = https://github.com/jeh15/drake-schunk-driver.git
