@@ -4,3 +4,6 @@
 [submodule "include/drake-schunk-driver"]
 	path = include/drake-schunk-driver
 	url = https://github.com/jeh15/drake-schunk-driver
+[submodule "include/ur_rtde"]
+	path = include/ur_rtde
+	url = https://gitlab.com/jeh15-gitlab/ur_rtde
