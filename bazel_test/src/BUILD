@@ -11,5 +11,7 @@ cc_binary(
         "@gflags//:gflags",
         "@lcm//:lcm",
         ],
-    linkopts = ["-lpthread"],
+    linkopts = [
+        "-lpthread",
+        ],
 )

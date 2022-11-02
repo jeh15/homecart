@@ -24,7 +24,7 @@ std::vector<double> get_target(const std::vector<double>& pose, double linear_st
 int main(int argc, char* argv[]){
     // Initialize Control Interface and Connect to UR SIM:
     ur_rtde::RTDEControlInterface rtde_control("192.168.4.30");
-     ur_rtde::RTDEReceiveInterface rtde_receive("192.168.4.30");
+    ur_rtde::RTDEReceiveInterface rtde_receive("192.168.4.30");
 
     // Check Initialization:
     std::cout << "Controller and Receiver Initialized!" << std::endl;
