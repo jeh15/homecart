@@ -84,9 +84,39 @@ print("Using EXAMPLES_LOCAL_DRAKE_PATH={}".format(EXAMPLES_LOCAL_DRAKE_PATH)) if
 load("@drake//tools/workspace:default.bzl", "add_default_workspace")
 add_default_workspace()
 
-# View into usr/include:
-new_local_repository(
-  name = "usr_include",
-  path = "/usr",
-  build_file = "usr_include.BUILD",
+# Load Git Repository Rule
+load("@bazel_tools//tools/build_defs/repo:git.bzl", "new_git_repository")
+
+# new_git_repository(
+#     name = "ur_rtde",
+#     remote = "https://gitlab.com/jeh15-gitlab/ur_rtde.git",
+#     branch = "master",
+#     build_file = "ur_rtde.BUILD",
+# )
+
+new_git_repository(
+    name = "ur_rtde",
+    remote = "https://gitlab.com/jeh15-gitlab/ur_rtde.git",
+    branch = "master",
+    build_file_content = """
+# ur_rtde Build File:
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "ur_rtde",
+    srcs = glob([
+        "ur_rtde/src/**",
+        "ur_rtde/src/urcl/**",
+    ]),
+    hdrs = glob([
+        "ur_rtde/include/ur_rtde/**",
+        "ur_rtde/include/urcl/**",
+        ]),
+    includes = [
+        "ur_rtde/src",
+        "ur_rtde/include/ur_rtde",
+        "ur_rtde/include/urcl",
+    ],
+)
+""",
 )

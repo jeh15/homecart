@@ -6,7 +6,7 @@ cc_binary(
     srcs = ["demo.cc",],
     linkstatic = 1,
     deps = [
-        "@usr_include//:ur_rtde",
+        "@ur_rtde//:ur_rtde",
         "@drake//lcmtypes:schunk",
         "@gflags//:gflags",
         "@lcm//:lcm",
