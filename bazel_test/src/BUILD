@@ -11,7 +11,6 @@ cmake(
         "librtde.so.1.5",
         "librtde.so.1.5.5",
         ],
-    install = True,
 )
 
 cc_binary(
