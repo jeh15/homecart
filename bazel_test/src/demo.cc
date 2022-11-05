@@ -52,11 +52,6 @@ int main(int argc, char* argv[]){
     std::this_thread::sleep_for(std::chrono::milliseconds(2000));
 
     // Setup UR Control Parameters:
-    double velocity = 0.1;
-    double acceleration = 0.1;
-    double dt = 1.0 / 500; // 2ms
-    double lookahead_time = 0.1;
-    double gain = 500;
     constexpr auto target_freq = std::chrono::milliseconds(2);
     std::vector<double> initial_pose = rtde_receive.getActualTCPPose();
 
