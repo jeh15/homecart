@@ -96,8 +96,6 @@ load("@rules_foreign_cc//foreign_cc:repositories.bzl", "rules_foreign_cc_depende
 
 rules_foreign_cc_dependencies()
 
-all_content = """filegroup(name = "all", srcs = glob(["**"]), visibility = ["//visibility:public"])"""
-
 # Load Git Repository Rule
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "new_git_repository")
 
