@@ -1,0 +1,17 @@
+load("@rules_foreign_cc//foreign_cc:defs.bzl", "cmake")
+
+filegroup(
+    name = "archive_contents",
+    srcs = glob(["**"]),
+)
+
+cmake(
+    name = "ur_rtde",
+    lib_source = ":archive_contents",
+    out_shared_libs = [
+        "librtde.so",
+        "librtde.so.1.5",
+        "librtde.so.1.5.5",
+    ],
+    visibility = ["//visibility:public"],
+)
