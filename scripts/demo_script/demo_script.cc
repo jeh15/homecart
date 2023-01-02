@@ -1,32 +1,22 @@
-#include "ur_rtde/rtde_receive_interface.h"
-#include "ur_rtde/rtde_control_interface.h"
-
 #include <chrono>
 #include <iostream>
 #include <vector>
 #include <threads.h>
 #include <math.h>
+#include <fstream>
+
+#include "ur_rtde/rtde_receive_interface.h"
+#include "ur_rtde/rtde_control_interface.h"
+
+#include <nlohmann/json.hpp>
 
 #include <lcm/lcm-cpp.hpp>
 #include "drake/lcmt_schunk_wsg_command.hpp"
 #include "drake/lcmt_schunk_wsg_status.hpp"
 
+using json = nlohmann::json;
 using drake::lcmt_schunk_wsg_command;
 using drake::lcmt_schunk_wsg_status;
-
-// Linear Pose Function: Z-Direction
-std::vector<double> linear_z(const std::vector<double>& pose, double linear_step=0.1){
-    std::vector<double> trajectory_target = pose;
-    trajectory_target[2] = pose[2] + linear_step;
-    return trajectory_target; 
-}
-
-// Linear Pose: X-Direction
-std::vector<double> linear_x(const std::vector<double>& pose, const double linear_step=0.1){
-    std::vector<double> trajectory_target = pose;
-    trajectory_target[0] = pose[0] + linear_step;
-    return trajectory_target; 
-}
 
 int main(int argc, char* argv[]){
     // Initialize Control Interface and Connect to UR SIM:
@@ -49,7 +39,7 @@ int main(int argc, char* argv[]){
 
     // Gripper Command Template:
     lcmt_schunk_wsg_command schunk_command;
-    schunk_command.target_position_mm = 100;
+    schunk_command.target_position_mm = 110;
     schunk_command.force = 10;
 
     // Set Gripper to known state:
@@ -58,49 +48,117 @@ int main(int argc, char* argv[]){
     // Sleep and wait for gripper (2s)
     std::this_thread::sleep_for(std::chrono::milliseconds(2000));
 
-    // Setup UR Control Parameters:
-    // double velocity = 0.1;
-    // double acceleration = 0.1;
-    // double dt = 1.0 / 500; // 2ms
-    // double lookahead_time = 0.1;
-    // double gain = 500;
-    constexpr auto target_freq = std::chrono::milliseconds(2);
-    std::vector<double> initial_pose = rtde_receive.getActualTCPPose();
+    // Store Poses in Vector:
+    std::vector<std::vector<double>> pose_up;
+    std::vector<std::vector<double>> pose_down;
+    std::vector<std::vector<double>> pose_ground;
 
-    // Move to block x position:
-    std::vector<double> pose;
-    pose = linear_x(initial_pose, -0.1);
-    rtde_control.moveL(pose);
-
+    // Go to initial positon:
+    std::string path = "/home/orl/repository/homecart/scripts/demo_script/initial_position.json";
+    std::ifstream file(path);
+    json data = json::parse(file);
+    std::vector<double> initial_pose = data["pose"];
+    rtde_control.moveL(initial_pose);
     std::this_thread::sleep_for(std::chrono::milliseconds(2000));
 
-    // Move down to block z position:
-    pose = linear_z(pose, -0.05);
-    rtde_control.moveL(pose);
+    // Load Poses: (UP)
+    for(int i = 1; i <= 3; i++){
+        std::string path = "/home/orl/repository/homecart/scripts/demo_script/block_" + std::to_string(i) + "_up.json";
+        std::ifstream file(path);
+        json data = json::parse(file);
+        pose_up.push_back(data["pose"]);
+    }
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+    // Load Poses: (DOWN)
+    for(int i = 1; i <= 3; i++){
+        std::string path = "/home/orl/repository/homecart/scripts/demo_script/block_" + std::to_string(i) + "_down.json";
+        std::ifstream file(path);
+        json data = json::parse(file);
+        pose_down.push_back(data["pose"]);
+    }
 
-    // Grab Block:
-    schunk_command.target_position_mm = 10;
-    schunk_command.force = 10;
-    lcm.publish("SCHUNK_WSG_COMMAND", &schunk_command);
+    // Load Poses: (GROUND)
+    for(int i = 1; i <= 3; i++){
+        std::string path = "/home/orl/repository/homecart/scripts/demo_script/ground_" + std::to_string(i) + ".json";
+        std::ifstream file(path);
+        json data = json::parse(file);
+        pose_ground.push_back(data["pose"]);
+    }
 
-    // Sleep and wait for gripper (1s)
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    // Control Parameters:
+    double speed = 0.5;
+    int time_delay = 1000;
+    // Block Stacking Control Loop:
+    for(size_t i = 0; i < pose_up.size(); i++){
+        // Move over block:
+        rtde_control.moveL(pose_up[i], speed);
+        std::this_thread::sleep_for(std::chrono::milliseconds(time_delay));
 
-    // Move back to original z position:
-    pose = linear_z(pose, 0.05);
-    rtde_control.moveL(pose);
+        // Move to grab block:
+        rtde_control.moveL(pose_down[i], speed);
+        std::this_thread::sleep_for(std::chrono::milliseconds(time_delay));
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+        // Grab Block:
+        schunk_command.target_position_mm = 10;
+        schunk_command.force = 10;
+        lcm.publish("SCHUNK_WSG_COMMAND", &schunk_command);
+        std::this_thread::sleep_for(std::chrono::milliseconds(time_delay));
 
-    // Drop Block:
-    schunk_command.target_position_mm = 100;
-    schunk_command.force = 10;
-    lcm.publish("SCHUNK_WSG_COMMAND", &schunk_command);
+        // Move back up:
+        rtde_control.moveL(pose_up[i], speed);
+        std::this_thread::sleep_for(std::chrono::milliseconds(time_delay));
 
-    // Sleep and wait for gripper (1s)
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        // Go to stacking area:
+        rtde_control.moveL(initial_pose, speed);
+        std::this_thread::sleep_for(std::chrono::milliseconds(time_delay));
+
+        // Place block at stacking area:
+        rtde_control.moveL(pose_ground[i], speed);
+        std::this_thread::sleep_for(std::chrono::milliseconds(time_delay));
+
+        // Release Block:
+        schunk_command.target_position_mm = 110;
+        schunk_command.force = 10;
+        lcm.publish("SCHUNK_WSG_COMMAND", &schunk_command);
+        std::this_thread::sleep_for(std::chrono::milliseconds(time_delay));
+
+        // Back to initial position:
+        rtde_control.moveL(initial_pose, speed);
+        std::this_thread::sleep_for(std::chrono::milliseconds(time_delay));
+    }
+
+    // for(size_t i = 0; i < 1; i++){
+    //     std::cout << "Pose Up: ";
+    //     for(auto j: pose_up[i]){
+    //         std::cout << j << " ";
+    //     }
+    //     std::cout << std::endl;
+
+    //     std::cout << "Pose Down: ";
+    //     for(auto j: pose_down[i]){
+    //         std::cout << j << " ";
+    //     }
+    //     std::cout << std::endl;
+
+    //     std::cout << "Pose Up: ";
+    //     for(auto j: pose_up[i]){
+    //         std::cout << j << " ";
+    //     }
+    //     std::cout << std::endl;
+
+    //     std::cout << "Initial Position: ";
+    //     for(auto j: initial_pose){
+    //         std::cout << j << " ";
+    //     }
+    //     std::cout << std::endl;
+
+    //     std::cout << "Ground Pose: ";
+    //     for(auto j: pose_ground[i]){
+    //         std::cout << j << " ";
+    //     }
+    //     std::cout << std::endl;
+    // }
+
 
     // Stop Procedure:
     rtde_control.servoStop();
