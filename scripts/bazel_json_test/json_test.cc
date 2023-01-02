@@ -1,38 +1,41 @@
+#include <chrono>
 #include <iostream>
+#include <vector>
+#include <threads.h>
+#include <math.h>
+#include <fstream>
+#include <filesystem>
+
+#include "ur_rtde/rtde_receive_interface.h"
+#include "ur_rtde/rtde_control_interface.h"
+
 #include <nlohmann/json.hpp>
 
 using json = nlohmann::json;
 
 int main()
 {
-    // create JSON values
-    json j_boolean = true;
-    json j_number_integer = 17;
-    json j_number_float = 23.42;
-    json j_object = {{"one", 1}, {"two", 2}};
-    json j_object_empty(json::value_t::object);
-    json j_array = {1, 2, 4, 8, 16};
-    json j_array_empty(json::value_t::array);
-    json j_string = "Hello, world";
+    // Load JSON:
+    std::string path = "/home/orl/repository/homecart/scripts/home_script/home_position.json";
+    std::ifstream file(path);
+    json data = json::parse(file);
 
-    // call back()
-    std::cout << j_boolean.back() << '\n';
-    std::cout << j_number_integer.back() << '\n';
-    std::cout << j_number_float.back() << '\n';
-    std::cout << j_object.back() << '\n';
-    //std::cout << j_object_empty.back() << '\n';  // undefined behavior
-    std::cout << j_array.back() << '\n';
-    //std::cout << j_array_empty.back() << '\n';   // undefined behavior
-    std::cout << j_string.back() << '\n';
+    // // Initialize Control Interface and Connect to UR SIM:
+    // ur_rtde::RTDEControlInterface rtde_control("192.168.4.30");
+    // ur_rtde::RTDEReceiveInterface rtde_receive("192.168.4.30");
 
-    // back() called on a null value
-    try
-    {
-        json j_null;
-        j_null.back();
+    // // Check Initialization:
+    // std::cout << "Controller and Receiver Initialized!" << std::endl;
+
+    // // Check Connection:
+    // std::cout << "Is Connected: " << rtde_control.isConnected() << std::endl;
+
+    // Move to pose from JSON:
+    std::vector<double> pose = data["pose"];
+
+    for (auto i: pose){
+        std::cout << i << ' ';
     }
-    catch (json::invalid_iterator& e)
-    {
-        std::cout << e.what() << '\n';
-    }
+    
+    return 0;
 }
