@@ -18,8 +18,13 @@ int main(int argc, char* argv[]){
     // Saves Current Pose as "Home Position" and serializes to a JSON:
 
     // Initialize Control Interface and Connect to UR SIM:
+    // Left arm:
     ur_rtde::RTDEControlInterface rtde_control("192.168.4.30");
     ur_rtde::RTDEReceiveInterface rtde_receive("192.168.4.30");
+
+    // Right arm:
+    // ur_rtde::RTDEControlInterface rtde_control("192.168.5.30");
+    // ur_rtde::RTDEReceiveInterface rtde_receive("192.168.5.30");
 
     // Check Initialization:
     std::cout << "Controller and Receiver Initialized!" << std::endl;

@@ -46,7 +46,7 @@ int main(int argc, char* argv[]){
     lcm.publish("SCHUNK_WSG_COMMAND", &schunk_command);
 
     // Sleep and wait for gripper (2s)
-    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+    std::this_thread::sleep_for(std::chrono::milliseconds(5000));
 
     // Store Poses in Vector:
     std::vector<std::vector<double>> pose_up;
@@ -87,44 +87,49 @@ int main(int argc, char* argv[]){
 
     // Control Parameters:
     double speed = 0.5;
-    int time_delay = 1000;
+    int move_freq = 500;
+    int grip_freq = 1000;
     // Block Stacking Control Loop:
     for(size_t i = 0; i < pose_up.size(); i++){
         // Move over block:
         rtde_control.moveL(pose_up[i], speed);
-        std::this_thread::sleep_for(std::chrono::milliseconds(time_delay));
+        std::this_thread::sleep_for(std::chrono::milliseconds(move_freq));
 
         // Move to grab block:
         rtde_control.moveL(pose_down[i], speed);
-        std::this_thread::sleep_for(std::chrono::milliseconds(time_delay));
+        std::this_thread::sleep_for(std::chrono::milliseconds(move_freq));
 
         // Grab Block:
         schunk_command.target_position_mm = 10;
         schunk_command.force = 10;
         lcm.publish("SCHUNK_WSG_COMMAND", &schunk_command);
-        std::this_thread::sleep_for(std::chrono::milliseconds(time_delay));
+        std::this_thread::sleep_for(std::chrono::milliseconds(grip_freq));
 
         // Move back up:
         rtde_control.moveL(pose_up[i], speed);
-        std::this_thread::sleep_for(std::chrono::milliseconds(time_delay));
+        std::this_thread::sleep_for(std::chrono::milliseconds(move_freq));
 
         // Go to stacking area:
         rtde_control.moveL(initial_pose, speed);
-        std::this_thread::sleep_for(std::chrono::milliseconds(time_delay));
+        std::this_thread::sleep_for(std::chrono::milliseconds(move_freq));
+
+        if(i == pose_up.size()-1){
+            break;
+        }
 
         // Place block at stacking area:
         rtde_control.moveL(pose_ground[i], speed);
-        std::this_thread::sleep_for(std::chrono::milliseconds(time_delay));
+        std::this_thread::sleep_for(std::chrono::milliseconds(move_freq));
 
         // Release Block:
         schunk_command.target_position_mm = 110;
         schunk_command.force = 10;
         lcm.publish("SCHUNK_WSG_COMMAND", &schunk_command);
-        std::this_thread::sleep_for(std::chrono::milliseconds(time_delay));
+        std::this_thread::sleep_for(std::chrono::milliseconds(grip_freq));
 
         // Back to initial position:
         rtde_control.moveL(initial_pose, speed);
-        std::this_thread::sleep_for(std::chrono::milliseconds(time_delay));
+        std::this_thread::sleep_for(std::chrono::milliseconds(move_freq));
     }
 
     // for(size_t i = 0; i < 1; i++){
