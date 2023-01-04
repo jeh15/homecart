@@ -55,9 +55,9 @@ int main(int argc, char* argv[]){
     schunk_command.target_position_mm = 60;
     schunk_command.force = 10;
 
-    // Set Gripper to known state: Left Arm -> "SCHUNK_WSG_COMMAND" : Right Arm -> "SCHUNK_WSG_COMMAND_EXTRA"
-    lcm.publish("SCHUNK_WSG_COMMAND", &schunk_command);
-    lcm.publish("SCHUNK_WSG_COMMAND_EXTRA", &schunk_command);
+    // Set Gripper to known state: Left Arm -> "SCHUNK_LEFT_COMMAND" : Right Arm -> "SCHUNK_RIGHT_COMMAND"
+    lcm.publish("SCHUNK_LEFT_COMMAND", &schunk_command);
+    lcm.publish("SCHUNK_RIGHT_COMMAND", &schunk_command);
 
     // Sleep and wait for gripper (2s)
     std::this_thread::sleep_for(std::chrono::milliseconds(5000));
@@ -103,7 +103,7 @@ int main(int argc, char* argv[]){
     // Right Arm Grab Spoon:
     schunk_command.target_position_mm = 10;
     schunk_command.force = 10;
-    lcm.publish("SCHUNK_WSG_COMMAND_EXTRA", &schunk_command);
+    lcm.publish("SCHUNK_RIGHT_COMMAND", &schunk_command);
     std::this_thread::sleep_for(std::chrono::milliseconds(grip_freq));
 
     // Move to up position:
@@ -118,13 +118,13 @@ int main(int argc, char* argv[]){
     // Left Arm Grab Spoon:
     schunk_command.target_position_mm = 10;
     schunk_command.force = 10;
-    lcm.publish("SCHUNK_WSG_COMMAND", &schunk_command);
+    lcm.publish("SCHUNK_LEFT_COMMAND", &schunk_command);
     std::this_thread::sleep_for(std::chrono::milliseconds(grip_freq));
 
     // Right Arm Release Spoon:
     schunk_command.target_position_mm = 100;
     schunk_command.force = 10;
-    lcm.publish("SCHUNK_WSG_COMMAND_EXTRA", &schunk_command);
+    lcm.publish("SCHUNK_RIGHT_COMMAND", &schunk_command);
     std::this_thread::sleep_for(std::chrono::milliseconds(grip_freq));
 
     // Left Arm Move To Bowl:
