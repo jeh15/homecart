@@ -49,7 +49,7 @@ int main(int argc, char* argv[]){
 
     // Gripper Command Template:
     lcmt_schunk_wsg_command schunk_command;
-    schunk_command.target_position_mm = 60;
+    schunk_command.target_position_mm = 30;
     schunk_command.force = 10;
 
     // Set Gripper to known state: Left Arm -> "SCHUNK_LEFT_COMMAND" : Right Arm -> "SCHUNK_RIGHT_COMMAND"
