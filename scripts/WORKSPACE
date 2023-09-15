@@ -32,8 +32,11 @@
 
 workspace(name = "scripts")
 
-DRAKE_COMMIT = "v1.9.0"
-DRAKE_CHECKSUM = "a80a38d51bf2608489f7b44a882d00b76dac9765590afbfcf0c17090c16501ab"
+DRAKE_COMMIT = "v1.20.0"
+DRAKE_CHECKSUM = "e343bc558f840be17c05053c6fc3fff899a3bf4540f3b285f6cd7ca5937f7b46"
+
+# DRAKE_COMMIT = "v1.9.0"
+# DRAKE_CHECKSUM = "a80a38d51bf2608489f7b44a882d00b76dac9765590afbfcf0c17090c16501ab"
 
 # Or choose a specific revision of Drake to use.
 # DRAKE_COMMIT = "be4f658487f739ba04ec079de46f9459b719636d"
