@@ -351,7 +351,7 @@ function cost = runningcosts(t, x, u)
          0   .1  0   0;
          0   0  .01  0;
          0   0  0  .001];
-    R = 0.1;
+    R = 0.5;
     xd = [-0.63,0,0,0];
     cost = 1.*(x-xd)*Q*(x-xd)' + u(1)*R*u(1)';
     

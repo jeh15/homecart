@@ -169,6 +169,8 @@ try:
         ball_acc_data = np.append(ball_acc_data,acc[0])
         ball_jerk_data = np.append(ball_jerk_data,jerk[0])
 
+        iteration = iteration + 1
+
         
 finally:
     pipeline.stop()
