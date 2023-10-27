@@ -10,7 +10,7 @@ from datetime import datetime
 
 # -----------------------------------------------------------
 # get ball state from camera
-def ball_state(frames, last_pos, last_vel, last_acc, last_time, depth_scale, stream_flag):
+def ball_state(frames, last_pos, last_vel, last_acc, last_time, depth_scale, stream_flag,iteration):
     depth_frame = frames.get_depth_frame()
     color_frame = frames.get_color_frame()
     depth_image = np.asanyarray(depth_frame.get_data())
@@ -37,9 +37,21 @@ def ball_state(frames, last_pos, last_vel, last_acc, last_time, depth_scale, str
     pos_real = pos_real/pos_real[2]
     pos_xy = pos_real[0:2]        
     pos = np.array([pos_xy[0], pos_xy[1], dist])
+
     vel = (pos - last_pos) / (time.time() - last_time)
     acc = (vel - last_vel) / (time.time() - last_time)
     jerk = (acc - last_acc) / (time.time() - last_time)
+
+    if iteration == 0:
+        vel = np.array([0.0, 0.0, 0.0])
+        acc = np.array([0.0, 0.0, 0.0])
+        jerk = np.array([0.0, 0.0, 0.0])
+    elif iteration == 1:
+        acc = np.array([0.0, 0.0, 0.0])
+        jerk = np.array([0.0, 0.0, 0.0])
+    elif iteration == 2:
+        jerk = np.array([0.0, 0.0, 0.0])      
+
     if stream_flag:
         cv2.putText(resized_color_image, f"Vel: {vel[0]:.4f} {vel[1]:.4f} {vel[2]:.4f} m/s", (80,80), cv2.FONT_HERSHEY_COMPLEX,0.5, (0,0,0), 1)
         cv2.putText(resized_color_image, f"Pos: {pos[0]:.2f} {pos[1]:.2f} {pos[2]:.2f} m", (80,100), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0,0,0), 1)
@@ -98,7 +110,6 @@ joint_speed = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 
 # -----------------------------------------------------------
 # main loop parameters
-initial = 1
 max_speed_increase = 0.0001
 ax_data = np.array([])
 ay_data = np.array([])
@@ -119,6 +130,7 @@ vel = 0.0;
 test_duration = 2.0
 ball_threshold = -0.45 # point at which it falls off the cutting board --and (last_pos[0] < ball_threshold)
 max_ax = 1.5
+iteration = 0
 # -----------------------------------------------------------
 
 try:
@@ -127,7 +139,7 @@ try:
         # Get ball state
         frames = pipeline.wait_for_frames()
         stream_flag = True
-        [pos, vel, acc, jerk] = ball_state(frames, last_pos, last_vel, last_acc, last_time, depth_scale, stream_flag)
+        [pos, vel, acc, jerk] = ball_state(frames, last_pos, last_vel, last_acc, last_time, depth_scale, stream_flag, iteration)
 
         # convert ball state to matlab double
         posx = matlab.double([pos[0]])

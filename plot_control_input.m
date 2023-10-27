@@ -2,13 +2,13 @@ clc
 clear
 close all
 
-M = readmatrix("data/data2_2023_10_26-01_14_37_PM.csv");
+M = readmatrix("data/data2_2023_10_27-01_23_30_PM.csv");
 
 time = M(1,:);
 ball_pos = M(2,:);
 arm_acc = M(3,:);
 
-u_traj = readmatrix("u_traj_data.csv");
+u_traj = readmatrix("data/u1.csv");
 
 %%
 
@@ -18,7 +18,7 @@ t_traj = 0:Th/(N-1):Th;
 
 pos_axlims = [0.4 2.2 -.8 -.3];
 
-acc_axlims = [0-.01 .1+.01 -2 2];
+acc_axlims = [0-.01 .1+.01 -.02 .02];
 
 for i = 1:size(time,2)
     subplot(1,2,1)

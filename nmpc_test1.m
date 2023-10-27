@@ -205,7 +205,7 @@ function out = nmpc_test1(x1,x2,x3,x4)
                       atol_ode_sim, rtol_ode_sim, type, iprint, ...
                       exitflag, output, t_Elapsed);
 
-    writematrix(u_new,'u_traj_data.csv','WriteMode','append')
+    writematrix(u_new,'data/u2.csv','WriteMode','append')
 
     out = u_new(1);
 end
@@ -351,7 +351,7 @@ function cost = runningcosts(t, x, u)
          0   .1  0   0;
          0   0  .01  0;
          0   0  0  .001];
-    R = 1.0;
+    R = 0.1;
     xd = [-0.63,0,0,0];
     cost = 1.*(x-xd)*Q*(x-xd)' + u(1)*R*u(1)';
     
