@@ -2,23 +2,43 @@ clc
 clear
 close all
 
-M = readmatrix("data/data2_2023_10_27-01_23_30_PM.csv");
+M = readmatrix("data/data2_2023_10_27-07_55_06_PM.csv");
 
 time = M(1,:);
 ball_pos = M(2,:);
 arm_acc = M(3,:);
+ball_vel = M(4,:);
+ball_acc = M(5,:);
+ball_jerk = M(6,:);
 
-u_traj = readmatrix("data/u1.csv");
+u_traj = readmatrix("data/u2.csv");
+
+%% plot states
+
+subplot(4,1,1)
+plot(time,ball_pos,'.-')
+
+subplot(4,1,2)
+plot(time,ball_vel,'.-')
+
+subplot(4,1,3)
+plot(time,ball_acc,'.-')
+
+subplot(4,1,4)
+plot(time,ball_jerk,'.-')
+
+figure(2)
+plot(time,arm_acc,'.-')
 
 %%
 
 N = 11;
-Th = 0.1;
+Th = 1.0;
 t_traj = 0:Th/(N-1):Th;
 
-pos_axlims = [0.4 2.2 -.8 -.3];
-
-acc_axlims = [0-.01 .1+.01 -.02 .02];
+% pos_axlims = [0.4 2.2 -.8 -.3];
+% 
+% acc_axlims = [0-.01 .1+.01 -.02 .02];
 
 for i = 1:size(time,2)
     subplot(1,2,1)
@@ -28,7 +48,7 @@ for i = 1:size(time,2)
     xlabel('time(s)','FontSize',20)
     ylabel('ball position (m)','FontSize',20)
     title('Ball position','FontSize',20)
-    axis(pos_axlims)
+    % axis(pos_axlims)
     ax = gca;
     ax.FontSize = 12;
 
@@ -37,7 +57,7 @@ for i = 1:size(time,2)
     xlabel('time(s)','FontSize',20)
     ylabel('Arm acceleration traj (rad/s^2)','FontSize',20)
     title('Arm acceleration traj','FontSize',20)    
-    axis(acc_axlims)
+    % axis(acc_axlims)
     ax = gca;
     ax.FontSize = 12;
     

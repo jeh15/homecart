@@ -1,4 +1,4 @@
-function out = nmpc_test1(x1,x2,x3,x4)            
+function out = nmpc2(x1,x2,x3,x4)            
 %==========================================================================    
 % Goal: Solve the tossing of a mass into a bowl problem
 % 
@@ -207,7 +207,7 @@ function out = nmpc_test1(x1,x2,x3,x4)
 
     writematrix(u_new,'data/u2.csv','WriteMode','append')
     
-    
+    u_new
 
     out = u_new;
 end
@@ -239,7 +239,7 @@ function [u, V, exitflag, output] = solveOptimalControlProblem ...
     ub = [];
     for k=1:N
         [Anew, bnew, Aeqnew, beqnew, lbnew, ubnew] = ...
-               linearconstraints(t0+k*Th,x(k,:),u0(:,k));
+               linearconstraints(t0+k*Th,x(k,:),u0(:,k),params);
         A = blkdiag(A,Anew);
         b = [b, bnew];
         Aeq = blkdiag(Aeq,Aeqnew);
@@ -350,12 +350,12 @@ function cost = runningcosts(t, x, u)
 
 
     Q = [1   0  0   0;
-         0   .1  0   0;
-         0   0  0  0;
-         0   0  0  0];
+         0   1  0   0;
+         0   0  1  0;
+         0   0  0  1];
     R = 0.5;
     xd = [-0.63,0,0,0];
-    cost = 1.*(x-xd)*Q*(x-xd)' + u(1)*R*u(1)';
+    cost = 1.0*(x-xd)*Q*(x-xd)' + u(1)*R*u(1)';
     
 % next two lines only necessary for slack variable
 %     lambda = 5000;  
@@ -376,8 +376,8 @@ function [c,ceq] = constraints(t, x, u, gamma1, gamma2, K, params)
     K = [0,0,0,0];
    
     % Control limit
-    c(end+1) = (u(1) - K*[x(1); x(2); x(3); x(4)]) - ulim;
-    c(end+1) = -(u(1) - K*[x(1); x(2); x(3); x(4)]) - ulim;
+    % c(end+1) = (u(1) - K*[x(1); x(2); x(3); x(4)]) - ulim;
+    % c(end+1) = -(u(1) - K*[x(1); x(2); x(3); x(4)]) - ulim;
 
 %==========================================================================
 %       SMPC settings
@@ -396,13 +396,13 @@ function [c,ceq] = terminalconstraints(t,x,params)
     ceq   = [];
 end
 %==========================================================================
-function [A, b, Aeq, beq, lb, ub] = linearconstraints(t, x, u)
+function [A, b, Aeq, beq, lb, ub] = linearconstraints(t, x, u, params)
     A   = [];
     b   = [];
     Aeq = [];
     beq = [];
-    lb = [];
-    ub = [];
+    lb = [-params.ulim];
+    ub = [params.ulim];
 end
 %==========================================================================
 function y = system(t, x, u, Th, apply_flag, sig, params)
