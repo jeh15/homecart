@@ -209,7 +209,7 @@ function out = nmpc_test1(x1,x2,x3,x4)
     
     
 
-    out = u_new;
+    out = u_new(1);
 end
 
 %==========================================================================
@@ -247,7 +247,7 @@ function [u, V, exitflag, output] = solveOptimalControlProblem ...
         lb = [lb, lbnew];
         ub = [ub, ubnew];
     end
-    A
+    
     % Solve optimization problem
     % tic
     [u, V, exitflag, output] = fmincon(@(u) costfunction(runningcosts, ...
@@ -350,11 +350,11 @@ function cost = runningcosts(t, x, u)
 
 
     Q = [1   0  0   0;
-         0   .1  0   0;
+         0   0  0   0;
          0   0  0  0;
          0   0  0  0];
-    R = 0.5;
-    xd = [-0.63,0,0,0];
+    R = 0.3;
+    xd = [-0.58,0,0,0];
     cost = 1.*(x-xd)*Q*(x-xd)' + u(1)*R*u(1)';
     
 % next two lines only necessary for slack variable

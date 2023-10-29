@@ -11,17 +11,13 @@ ball_vel1 = M(4,:);
 ball_acc1 = M(5,:);
 ball_jerk1 = M(6,:);
 
-ball_vel = M(4,:);
-ball_acc = M(5,:);
-ball_jerk = M(6,:);
-
 u_traj = readmatrix("data/u2.csv");
 
 for i = 7:size(time,2)
     if i > 7
-       ball_vel(i) = mean(ball_vel1(i-5:i));
-       ball_acc(i) = mean(ball_acc1(i-5:i));
-       ball_jerk(i) = mean(ball_jerk1(i-5:i));
+        ball_vel(i) = mean(ball_vel1(i-5:i));
+    else
+        ball_vel(i) = ball_vel1(i);
     end
    
 end
@@ -32,13 +28,13 @@ subplot(4,1,1)
 plot(time,ball_pos,'.-')
 
 subplot(4,1,2)
-plot(time,ball_vel,'.-b',time,ball_vel1,'.-r')
+plot(time,ball_vel,'.-')
 
 subplot(4,1,3)
-plot(time,ball_acc,'.-b',time,ball_acc1,'.-r')
+plot(time,ball_acc,'.-')
 
 subplot(4,1,4)
-plot(time,ball_jerk,'.-b',time,ball_jerk1,'.-r')
+plot(time,ball_jerk,'.-')
 
 figure(2)
 plot(time,arm_acc,'.-')
