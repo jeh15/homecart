@@ -133,9 +133,9 @@ ball_last_time = time.time()
 arm_last_time = time.time()
 initial_time = time.time()
 vel = 0.0
-test_duration = 2.0
+test_duration = 10.0
 ball_threshold = -0.45 # point at which it falls off the cutting board --and (last_pos[0] < ball_threshold)
-max_ax = 1.5
+max_ax = 0.5
 iteration = 0
 # -----------------------------------------------------------
 
@@ -159,8 +159,15 @@ try:
             a_avg = np.mean(ball_acc_data[-5:])
             j_avg = np.mean(ball_jerk_data[-5:])
             q = [pos[0], v_avg, a_avg, j_avg]
+            last_pos = copy.deepcopy(pos)
+            last_vel = copy.deepcopy([v_avg,0.,0.])
+            last_acc = copy.deepcopy([a_avg,0.,0.])            
         else:
             q = [pos[0], vel[0], acc[0], jerk[0]]
+            last_pos = copy.deepcopy(pos)
+            last_vel = copy.deepcopy(vel)
+            last_acc = copy.deepcopy(acc)            
+
 
         # convert ball state to matlab double
         posx = matlab.double([q[0]])
@@ -181,9 +188,7 @@ try:
         rtde_c.speedJ(joint_speed, min(abs(ax),max_ax),0.0001)
 
         # record data
-        last_pos = copy.deepcopy(pos)
-        last_vel = copy.deepcopy(vel)
-        last_acc = copy.deepcopy(acc)
+
         last_time = time.time()
 
         iteration = iteration + 1

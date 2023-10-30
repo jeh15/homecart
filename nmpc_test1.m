@@ -25,7 +25,7 @@ function out = nmpc_test1(x1,x2,x3,x4)
 
     % control input settings
     u0   = 0.01*ones(1,N);  % initial input guess
-    ulim = 1.5;
+    ulim = 0.2;
 
     % task state constraint - set state limits
     sig = 20*.1*.1*0.08;             % sigma of Gaussian distribution -> covariance matrix with sigma^2 (here: uncertainty considered)
@@ -350,7 +350,7 @@ function cost = runningcosts(t, x, u)
 
 
     Q = [1   0  0   0;
-         0   0  0   0;
+         0   .1  0   0;
          0   0  0  0;
          0   0  0  0];
     R = 0.3;

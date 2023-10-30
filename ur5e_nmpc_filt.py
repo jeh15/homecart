@@ -7,6 +7,23 @@ from rtde_control import RTDEControlInterface as RTDEControl
 import matlab.engine            #import the matlab engine
 import copy
 from datetime import datetime
+from scipy import signal 
+from numpy import zeros, random
+
+
+# -----------------------------------------------------------
+# low pass filter
+def init_lowpass():
+    numtaps = 150           # FIR filter number of coefficients
+    cutoff_freq = 5/(15/2)  # hz # sampling:15   cutoff:5 
+    b = signal.firwin(numtaps, cutoff_freq)
+    z = signal.lfilter_zi(b, 1) # initial conditions for lfilter
+    return b,z
+
+def low_pass(data, b, z):
+    filt_data = signal.lfilter(b, 1, [data], zi=z)
+    return filt_data
+# -----------------------------------------------------------
 
 
 # -----------------------------------------------------------
@@ -114,6 +131,21 @@ joint_speed = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 
 
 # -----------------------------------------------------------
+# initialize low pass filter
+b,z = init_lowpass()
+z1 = copy.deepcopy(z)
+z2 = copy.deepcopy(z)
+z3 = copy.deepcopy(z)
+
+fball_pos_data = np.array([])
+fball_vel_data = np.array([])
+fball_acc_data = np.array([])
+fball_jerk_data = np.array([])
+# -----------------------------------------------------------
+
+
+
+# -----------------------------------------------------------
 # main loop parameters
 max_speed_increase = 0.0001
 ax_data = np.array([])
@@ -135,7 +167,7 @@ initial_time = time.time()
 vel = 0.0
 test_duration = 2.0
 ball_threshold = -0.45 # point at which it falls off the cutting board --and (last_pos[0] < ball_threshold)
-max_ax = 1.5
+max_ax = 0.2
 iteration = 0
 # -----------------------------------------------------------
 
@@ -154,11 +186,20 @@ try:
         ball_acc_data = np.append(ball_acc_data,acc[0])
         ball_jerk_data = np.append(ball_jerk_data,jerk[0])
 
+
+        fa,z2 = low_pass(acc[0], b, z2)            # fv,z1 = low_pass(vel[0], b, z1)
+        fj,z3 = low_pass(jerk[0], b, z3)
+        fball_acc_data = np.append(fball_acc_data,fa)
+        fball_jerk_data = np.append(fball_jerk_data,fj)
+
+
+        # fball_vel_data = np.append(fball_vel_data,fv)
+
         if iteration > 5:
             v_avg = np.mean(ball_vel_data[-5:])
             a_avg = np.mean(ball_acc_data[-5:])
             j_avg = np.mean(ball_jerk_data[-5:])
-            q = [pos[0], v_avg, a_avg, j_avg]
+            q = [pos[0], v_avg, fa, fj]
         else:
             q = [pos[0], vel[0], acc[0], jerk[0]]
 
@@ -198,7 +239,7 @@ finally:
     # np.savetxt('data.csv', data, delimiter=',')
 
 
-    data = np.vstack((time_data,  ball_pos_data, ax_data, ball_vel_data, ball_acc_data, ball_jerk_data ))
+    data = np.vstack((time_data,  ball_pos_data, ax_data, ball_vel_data, ball_acc_data, ball_jerk_data, fball_acc_data, fball_jerk_data ))
     timestamp = datetime.now().strftime("%Y_%m_%d-%I_%M_%S_%p")
     filename = "./data/data2_" + timestamp + ".csv"
     np.savetxt(filename, data, delimiter=',')
