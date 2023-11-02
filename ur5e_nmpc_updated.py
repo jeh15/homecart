@@ -11,7 +11,7 @@ from datetime import datetime
 
 # -----------------------------------------------------------
 # get ball state from camera
-def ball_state(frames, last_pos, last_vel, last_acc, last_time, depth_scale, stream_flag,iteration):
+def ball_state(frames, last_pos, last_vel, last_acc, last_time, depth_scale, stream_flag,iteration,out):
     depth_frame = frames.get_depth_frame()
     color_frame = frames.get_color_frame()
     depth_image = np.asanyarray(depth_frame.get_data())
@@ -30,6 +30,7 @@ def ball_state(frames, last_pos, last_vel, last_acc, last_time, depth_scale, str
         cv2.rectangle(depth_image, (x, y), (x + w, y + h), (0, 255, 0), 2)
     else:
         print("Object not detected")
+    out.write(resized_color_image)
     depth = depth_image[math.ceil(y+w/2),math.ceil(x+w/2)].astype(float)
     dist = depth * depth_scale
     pos_pixel = np.array([x+w/2, y+w/2, 1.])
@@ -98,6 +99,11 @@ pipeline.start(config)
 # ----------------------------------------------------------- 
 
 
+fourcc = cv2.VideoWriter_fourcc(*'XVID')
+out = cv2.VideoWriter('balancing_test.mp4', fourcc, 20.0, (640,  480))
+
+
+
 # -----------------------------------------------------------
 homography = np.array([[-1.91855468e-03,-5.64280788e-05,  1.78707726e-01],[-6.23853288e-06,  1.66568828e-03, -7.74825784e-03],[-2.41772053e-04,  3.13027163e-04,  1.00000000e+00]])
 # -----------------------------------------------------------
@@ -133,9 +139,9 @@ ball_last_time = time.time()
 arm_last_time = time.time()
 initial_time = time.time()
 vel = 0.0
-test_duration = 10.0
+test_duration = 6.0
 ball_threshold = -0.45 # point at which it falls off the cutting board --and (last_pos[0] < ball_threshold)
-max_ax = 0.5
+max_ax = 1.0
 iteration = 0
 # -----------------------------------------------------------
 
@@ -146,7 +152,11 @@ try:
         # Get ball state
         frames = pipeline.wait_for_frames()
         stream_flag = True
-        [pos, vel, acc, jerk] = ball_state(frames, last_pos, last_vel, last_acc, ball_last_time, depth_scale, stream_flag, iteration)
+        [pos, vel, acc, jerk] = ball_state(frames, last_pos, last_vel, last_acc, ball_last_time, depth_scale, stream_flag, iteration,out)
+
+        if iteration == 0:
+            xt = pos[0]
+
         ball_last_time = time.time()
 
         ball_pos_data = np.append(ball_pos_data,pos[0])
@@ -176,7 +186,7 @@ try:
         jerkx = matlab.double([q[3]])
 
         # find cmd to balance the ball
-        ax = eng.nmpc_test1(posx, velx, accx, jerkx, nargout=1)
+        ax = eng.nmpc_test1(posx, velx, accx, jerkx, xt, nargout=1)
         ax_data = np.append(ax_data, ax)
         dt = time.time() - arm_last_time
         arm_last_time = time.time()
@@ -207,3 +217,6 @@ finally:
     timestamp = datetime.now().strftime("%Y_%m_%d-%I_%M_%S_%p")
     filename = "./data/data2_" + timestamp + ".csv"
     np.savetxt(filename, data, delimiter=',')
+    out.release()
+    cv2.destroyAllWindows()
+

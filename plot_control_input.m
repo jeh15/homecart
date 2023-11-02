@@ -2,7 +2,7 @@ clc
 clear
 close all
 
-M = readmatrix("data/data2_2023_10_29-05_21_43_PM.csv");
+M = readmatrix("data/data2_2023_11_01-03_09_21_PM.csv");
 
 time = M(1,:);
 ball_pos = M(2,:);

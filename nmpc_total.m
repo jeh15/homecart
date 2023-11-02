@@ -1,4 +1,4 @@
-function out = nmpc_test1(x1,x2,x3,x4,xt)            
+function out = nmpc_total(x1,x2,x3,x4)            
 %==========================================================================    
 % Goal: Solve the tossing of a mass into a bowl problem
 % 
@@ -16,18 +16,16 @@ function out = nmpc_test1(x1,x2,x3,x4,xt)
     N      = 11;             % Number of nodes (horizon)
     Th     = 0.5;            % MPC Time horizon
     Tc     = 0.1;            % Control Time horizon
+
     % xmeasure = [xx 0.0 0.0 0.0];     % initial [x dx ddx dddx] (last ur5e link)
-    xmeasure = [x1 x2 x3 0.01*x4];     % initial [x dx ddx dddx] (last ur5e link)
+
+    xmeasure = [x1 x2 x3 0];     % initial [x dx ddx dddx] (last ur5e link)
+
     tmeasure = 0.0;        % initial time (do not change)
 
     % control input settings
-    u0   = 0.05*ones(1,N);  % initial input guess
-    ulim = 1.0;
-    filename = 'data/u407.csv';
-    costQ =  1000.0*[1   0   0  0;
-                     0   0   0  0;
-                     0   0   0  0;
-                     0   0   0  0];
+    u0   = 0.01*ones(1,N);  % initial input guess
+    ulim = 0.2;
 
     % task state constraint - set state limits
     sig = 20*.1*.1*0.08;             % sigma of Gaussian distribution -> covariance matrix with sigma^2 (here: uncertainty considered)
@@ -93,8 +91,6 @@ function out = nmpc_test1(x1,x2,x3,x4,xt)
 %    params.delta = delta;
     params.state = state;
     params.Tc = Tc;
-    params.xt = xt;
-    params.costQ = costQ;
     
     rng('shuffle');                 % random seed
     s = rng;                        % save rng setting
@@ -209,29 +205,22 @@ function out = nmpc_test1(x1,x2,x3,x4,xt)
                       atol_ode_sim, rtol_ode_sim, type, iprint, ...
                       exitflag, output, t_Elapsed);
 
-    writematrix(u_new,filename,'WriteMode','append')
+    writematrix(u_new,'data/u2.csv','WriteMode','append')
     
     
 
-    out = u_new(1);
+    out = u_new;
 end
 
-%==========================================================================
-%                           measureInitialValue
 %==========================================================================
 function [t0, x0] = measureInitialValue ( tmeasure, xmeasure )
     t0 = tmeasure;
     x0 = xmeasure;
 end
 %==========================================================================
-%                           shift horizon
-%==========================================================================
-
 function u0 = shiftHorizon(u)
     u0 = [u(:,2:size(u,2)) u(:,size(u,2))];
 end
-%==========================================================================
-%                           solve optimal control problem
 %==========================================================================
 function [u, V, exitflag, output] = solveOptimalControlProblem ...
     (runningcosts, terminalcosts, constraints, terminalconstraints, ...
@@ -270,8 +259,6 @@ function [u, V, exitflag, output] = solveOptimalControlProblem ...
     % toc
 end
 %==========================================================================
-%                           cost function
-%==========================================================================
 function cost = costfunction(runningcosts, terminalcosts, system, ...
                     N, Th, t0, x0, u, ...
                     atol_ode_sim, rtol_ode_sim, type, sig, params)
@@ -280,12 +267,10 @@ function cost = costfunction(runningcosts, terminalcosts, system, ...
     x = computeOpenloopSolution(system, N, Th, t0, x0, u, ...
                                 atol_ode_sim, rtol_ode_sim, type, sig, params);
     for k=1:N
-        cost = cost+runningcosts(t0+k*Th, x(k,:), u(:,k),params);
+        cost = cost+runningcosts(t0+k*Th, x(k,:), u(:,k));
     end
     cost = cost+terminalcosts(t0+(N+1)*Th, x(N+1,:));
 end
-%==========================================================================
-%                           non linear constraints
 %==========================================================================
 function [c,ceq] = nonlinearconstraints(constraints, ...
     terminalconstraints, system, cov_propagation, ...
@@ -332,8 +317,6 @@ function [c,ceq] = nonlinearconstraints(constraints, ...
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 end
 %==========================================================================
-%                           compute open loop solution
-%==========================================================================
 function x = computeOpenloopSolution(system, N, Th, t0, x0, u, ...
                                      atol_ode_sim, rtol_ode_sim, type, sig, params)
     x(1,:) = x0;
@@ -344,8 +327,6 @@ function x = computeOpenloopSolution(system, N, Th, t0, x0, u, ...
                              atol_ode_sim, rtol_ode_sim, type, uncertainty_flag, sig, params);
     end
 end
-%==========================================================================
-%                           dynamic
 %==========================================================================
 function [x, t_intermediate, x_intermediate] = dynamic(system, Th, t0, ...
              x0, u, atol_ode, rtol_ode, type, apply_flag, sig, params)
@@ -363,16 +344,18 @@ end
 %==========================================================================
 
 %==========================================================================
-%                           running costs
+% NMPC functions
 %==========================================================================
-function cost = runningcosts(t, x, u,params)
-    
-    xt = params.xt;
+function cost = runningcosts(t, x, u)
 
-    Q = params.costQ;
+
+    Q = [1   0  0   0;
+         0   0  0   0;
+         0   0  0  0;
+         0   0  0  0];
     R = 0.;
-    xd = [xt,0,0,0];
-    cost = (x-xd)*Q*(x-xd)' + u(1)*R*u(1)';
+    xd = [-0.58,0,0,0];
+    cost = 1.*(x-xd)*Q*(x-xd)' + u(1)*R*u(1)';
     
 % next two lines only necessary for slack variable
 %     lambda = 5000;  
@@ -380,14 +363,10 @@ function cost = runningcosts(t, x, u,params)
 
 end
 %==========================================================================
-%                           terminal costs
-%==========================================================================
 function cost = terminalcosts(t, x)
 
     cost = 0.0;
 end
-%==========================================================================
-%                           constraints
 %==========================================================================
 function [c,ceq] = constraints(t, x, u, gamma1, gamma2, K, params)
 
@@ -412,14 +391,10 @@ function [c,ceq] = constraints(t, x, u, gamma1, gamma2, K, params)
 
 end
 %==========================================================================
-%                           terminal constraints
-%==========================================================================
 function [c,ceq] = terminalconstraints(t,x,params)
     c   = [];
     ceq   = [];
 end
-%==========================================================================
-%                           linear constraints
 %==========================================================================
 function [A, b, Aeq, beq, lb, ub] = linearconstraints(t, x, u)
     A   = [];
@@ -429,8 +404,6 @@ function [A, b, Aeq, beq, lb, ub] = linearconstraints(t, x, u)
     lb = [];
     ub = [];
 end
-%==========================================================================
-%                           system
 %==========================================================================
 function y = system(t, x, u, Th, apply_flag, sig, params)
     % apply_flag: 1) noise is applied for real system; 0) no noise for prediction
@@ -456,8 +429,6 @@ function y = system(t, x, u, Th, apply_flag, sig, params)
     end
     y = y';    
 end
-%==========================================================================
-%                           cov propagation
 %==========================================================================
 function sigma_e = cov_propagation(N, sig, params)
     w_cov = [sig^2 0 0 0;
