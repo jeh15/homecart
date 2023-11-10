@@ -2,8 +2,8 @@ clc
 clear
 close all
 
-M = readmatrix("data/data2_2023_11_01-04_08_28_PM.csv");
-u2 = readmatrix("data/u407.csv");
+M = readmatrix("data/data2_2023_11_09-08_08_50_PM.csv");
+u2 = readmatrix("data/u_nov9_2008.csv");
 
 time = M(1,:);
 ball_pos = M(2,:);
@@ -94,7 +94,7 @@ for i=1:n
     % axis(j_ax)
     xlim(xl)
     ylim(ylj)    
-    ylabel('Jerk(m?s^3)',"FontSize",16)
+    ylabel('Jerk(m/s^3)',"FontSize",16)
     xlabel('Time(s)',"FontSize",22)
     title('Jerk',"FontSize",16)
 
