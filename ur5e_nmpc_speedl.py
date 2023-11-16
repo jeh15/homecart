@@ -118,7 +118,7 @@ rtde_r = rtde_receive.RTDEReceiveInterface("192.168.5.30")
 
 # Parameters
 acceleration = 0.2
-joint_speed = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+tool_speed = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 # ----------------------------------------------------------- 
 
 
@@ -219,14 +219,15 @@ try:
         ax_data = np.append(ax_data, ax)
         dt = time.time() - arm_last_time
         arm_last_time = time.time()
-        speed_increaseX = -1.*ax*dt
+        speed_increaseX = 1.*ax*dt
         vx_inc_data = np.append(vx_inc_data, speed_increaseX)
         time_data = np.append(time_data, time.time() - initial_time)
         # joint_speed[4] += speed_increaseX
 
-        js_inc = speed_increaseX * j_ratio
-        joint_speed += js_inc
-        rtde_c.speedJ(joint_speed, min(abs(ax),max_ax),0.0001)
+        js_inc = speed_increaseX
+        tool_speed[4] += js_inc
+        # rtde_c.speedL(tool_speed, min(abs(ax),max_ax),0.0001)
+        rtde_c.speedL(tool_speed, 1.0,0.0001)
 
         # record data
 

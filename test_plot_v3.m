@@ -40,8 +40,8 @@ close all
     params.Th = Th;
 
 %%
-M = readmatrix("data/data2_2023_11_15-06_55_23_PM.csv");
-u2 = readmatrix("data/u_nov15_1854.csv");
+M = readmatrix("data/data2_2023_11_15-10_05_29_PM.csv");
+u2 = readmatrix("data/u_nov15_2204.csv");
 
 time = M(1,:);
 ball_pos = M(2,:);

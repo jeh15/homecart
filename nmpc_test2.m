@@ -27,7 +27,7 @@ function out = nmpc_test2(x1,x2,x3,x4,xt)
     % control input settings
     u0   = 0.05*ones(1,N);  % initial input guess
     ulim = 1.0;
-    filename = 'data/u_nov15_1854.csv';
+    filename = 'data/u_nov15_2223.csv';
     % costQ =  4*10000.0*[1    0   0  0;
     costQ =  1.0*[1    0   0  0;
                   0   0.1   0  0;
@@ -220,7 +220,7 @@ function out = nmpc_test2(x1,x2,x3,x4,xt)
     
     
 
-    out = u_new(3);
+    out = u_new(1   );
 end
 
 %==========================================================================
