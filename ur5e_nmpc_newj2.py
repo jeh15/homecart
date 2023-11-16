@@ -165,9 +165,12 @@ j_delta = j_up - j_down
 j_ratio = j_delta/max(abs(j_delta))
 # -----------------------------------------------------------
 
+ball_x = -0.5
+ball_range = [-7,-4]
+
 
 try:
-    while ((time.time() - initial_time) < test_duration) and (int(joint_angles[0]) in range(angle_range[0],angle_range[1]) ):
+    while ((time.time() - initial_time) < test_duration) and (int(ball_x*10.0) in range(ball_range[0],ball_range[1]) ):
 
         # print time now
         time_now = time.time() - initial_time
@@ -177,6 +180,7 @@ try:
         frames = pipeline.wait_for_frames()
         stream_flag = True
         [pos, vel, acc, jerk] = ball_state(frames, last_pos, last_vel, last_acc, ball_last_time, depth_scale, stream_flag, iteration,out, time_now)
+        ball_x = copy.deepcopy(pos[0])
 
         if iteration == 0:
             xt = pos[0]
