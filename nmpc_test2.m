@@ -1,4 +1,4 @@
-function out = nmpc_test1(x1,x2,x3,x4,xt)            
+function out = nmpc_test2(x1,x2,x3,x4,xt)            
 %==========================================================================    
 % Goal: Solve the tossing of a mass into a bowl problem
 % 
@@ -8,26 +8,32 @@ function out = nmpc_test1(x1,x2,x3,x4,xt)
 %  
 %==========================================================================    
 
+% offset positions
+% x1 = x1 + 0.6;
+% xt = xt + 0.6;
+
 
 %==========================================================================    
 % MPC settings
 %==========================================================================    
     Tfinal = 1.0*10;         % Tfinal for simulation
     N      = 11;             % Number of nodes (horizon)
-    Th     = 0.5;            % MPC Time horizon
+    Th     = 0.1*0.5;            % MPC Time horizon
     Tc     = 0.1;            % Control Time horizon
     % xmeasure = [xx 0.0 0.0 0.0];     % initial [x dx ddx dddx] (last ur5e link)
-    xmeasure = [x1 x2 x3 0.01*x4];     % initial [x dx ddx dddx] (last ur5e link)
+    xmeasure = [x1 x2 0.1*x3 0.0001*x4];     % initial [x dx ddx dddx] (last ur5e link)
     tmeasure = 0.0;        % initial time (do not change)
 
     % control input settings
     u0   = 0.05*ones(1,N);  % initial input guess
     ulim = 1.0;
-    filename = 'data/u_nov9_2008.csv';
-    costQ =  10000.0*[1   0   0  0;
-                     0   0   0  0;
-                     0   0   0  0;
-                     0   0   0  0];
+    filename = 'data/u_nov15_1854.csv';
+    % costQ =  4*10000.0*[1    0   0  0;
+    costQ =  1.0*[1    0   0  0;
+                  0   0.1   0  0;
+                  0    0   0  0;
+                  0    0   0  0];
+    costR = 1e-6;
 
     % task state constraint - set state limits
     sig = 20*.1*.1*0.08;             % sigma of Gaussian distribution -> covariance matrix with sigma^2 (here: uncertainty considered)
@@ -66,7 +72,7 @@ function out = nmpc_test1(x1,x2,x3,x4,xt)
           0  0  0  0;];
     
     m   = 0.003;            % Mass              [kg]
-    R   = 0.02;
+    R   = 0.017;
     Jz  = .5*m*R^2;    % Moment of inertia [kg.m2]
     g   = 9.81;             % Gravity           [m/s2]
     
@@ -95,6 +101,7 @@ function out = nmpc_test1(x1,x2,x3,x4,xt)
     params.Tc = Tc;
     params.xt = xt;
     params.costQ = costQ;
+    params.costR = costR;
     
     rng('shuffle');                 % random seed
     s = rng;                        % save rng setting
@@ -213,7 +220,7 @@ function out = nmpc_test1(x1,x2,x3,x4,xt)
     
     
 
-    out = u_new(1);
+    out = u_new(3);
 end
 
 %==========================================================================
@@ -370,7 +377,7 @@ function cost = runningcosts(t, x, u,params)
     xt = params.xt;
 
     Q = params.costQ;
-    R = 0.;
+    R = params.costR;
     xd = [xt,0,0,0];
     cost = (x-xd)*Q*(x-xd)' + u(1)*R*u(1)';
     
@@ -438,8 +445,7 @@ function y = system(t, x, u, Th, apply_flag, sig, params)
     B = params.sysB;
     % K = [0.8151    2.7097   11.8373    3.7545];    
     K = [0,0,0,0];
-
-
+    
     y = A*x'+B*(u(1,1) - K*[x(1); x(2); x(3); x(4)]);
     
     if apply_flag == 1

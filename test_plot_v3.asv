@@ -12,6 +12,7 @@ close all
     Th     = 0.5;            % MPC Time horizon
     Tc     = 0.1;            % Control Time horizon
     tmeasure = 0.0;        % initial time (do not change)
+    plot_Th = 0.5;
 %==========================================================================    
 % System Parameters
 %==========================================================================        
@@ -40,8 +41,8 @@ close all
     params.Th = Th;
 
 %%
-M = readmatrix("data/data2_2023_11_09-08_08_50_PM.csv");
-u2 = readmatrix("data/u_nov9_2008.csv");
+M = readmatrix("data/data2_2023_11_14-10_56_21_PM.csv");
+u2 = readmatrix("data/u_nov14_2255.csv");
 
 time = M(1,:);
 ball_pos = M(2,:);
@@ -71,8 +72,8 @@ n = size(ball_pos,2);
 
 xl = [time(1),time(end)];
 
-ylp = [-.7 -.4]; 
-ylp = [-10 100]; 
+% ylp = [-.7 -.4]; 
+% ylp = [-10 100]; 
 ylv = [min(ball_vel1) max(ball_vel1)]; 
 yla = [min(ball_acc1) max(ball_acc1)]; 
 ylj = [min(ball_jerk1) max(ball_jerk1)]; 
@@ -87,7 +88,7 @@ ylarm = [min(u2,[],"all") max(u2,[],"all")];
 % j_ax = [-0.1 10.1 -141.8087 221.1771];
 
 
-t_traj = 0:Th/10:Th;
+t_traj = 0:plot_Th/10:plot_Th;
 
 for i=1:n
     subplot(4,2,1)
@@ -105,7 +106,7 @@ for i=1:n
     hold off
     % axis(p_ax)
     xlim(xl)
-    ylim(ylp)
+    % ylim(ylp)
     ylabel('Position(m)',"FontSize",16)
     title('Position',"FontSize",22)
     xlabel('Time(s)',"FontSize",16)

@@ -12,7 +12,7 @@ import rtde_receive
 
 # -----------------------------------------------------------
 # get ball state from camera
-def ball_state(frames, last_pos, last_vel, last_acc, last_time, depth_scale, stream_flag,iteration,out):
+def ball_state(frames, last_pos, last_vel, last_acc, last_time, depth_scale, stream_flag,iteration,out, time_now):
     depth_frame = frames.get_depth_frame()
     color_frame = frames.get_color_frame()
     depth_image = np.asanyarray(depth_frame.get_data())
@@ -31,6 +31,7 @@ def ball_state(frames, last_pos, last_vel, last_acc, last_time, depth_scale, str
         cv2.rectangle(depth_image, (x, y), (x + w, y + h), (0, 255, 0), 2)
     else:
         print("Object not detected")
+    cv2.putText(resized_color_image, f"time : {time_now:.4f} s", (80,80), cv2.FONT_HERSHEY_COMPLEX,0.5, (0,0,0), 1)        
     out.write(resized_color_image)
     depth = depth_image[math.ceil(y+w/2),math.ceil(x+w/2)].astype(float)
     dist = depth * depth_scale
@@ -152,14 +153,14 @@ iteration = 0
 # setting joint limit
 joint_angles = rtde_r.getActualQ()
 joint_angles = [i *180.0/math.pi for i in joint_angles]
-angle_range = [-95,-85]
+angle_range = [-104,-80]
 # -----------------------------------------------------------
 
 
 # -----------------------------------------------------------
 # convert acc to joint traj
-j_up = np.asanyarray([-105.46, -97.01, -95.6, -77.89, 103.56, 345.6])
-j_down = np.asanyarray([-81.25, -77.14, -98.71, -90.34, 81.73, 367.27])
+j_up = np.asanyarray([-103.23, -83.26, -98.16, -86.2, 102.03, 347.11])
+j_down = np.asanyarray([-80.77, -73.64, -101.6, -94.02, 83.96, 368.62])
 j_delta = j_up - j_down
 j_ratio = j_delta/max(abs(j_delta))
 # -----------------------------------------------------------
@@ -168,10 +169,14 @@ j_ratio = j_delta/max(abs(j_delta))
 try:
     while ((time.time() - initial_time) < test_duration) and (int(joint_angles[0]) in range(angle_range[0],angle_range[1]) ):
 
+        # print time now
+        time_now = time.time() - initial_time
+        print("Time: ", time_now)
+
         # Get ball state
         frames = pipeline.wait_for_frames()
         stream_flag = True
-        [pos, vel, acc, jerk] = ball_state(frames, last_pos, last_vel, last_acc, ball_last_time, depth_scale, stream_flag, iteration,out)
+        [pos, vel, acc, jerk] = ball_state(frames, last_pos, last_vel, last_acc, ball_last_time, depth_scale, stream_flag, iteration,out, time_now)
 
         if iteration == 0:
             xt = pos[0]
@@ -213,7 +218,7 @@ try:
         speed_increaseX = -1.*ax*dt
         vx_inc_data = np.append(vx_inc_data, speed_increaseX)
         time_data = np.append(time_data, time.time() - initial_time)
-        joint_speed[4] += speed_increaseX
+        # joint_speed[4] += speed_increaseX
 
         js_inc = speed_increaseX * j_ratio
         joint_speed += js_inc

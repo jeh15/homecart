@@ -3,15 +3,15 @@ clear
 close all
 
 %%
-
 %==========================================================================    
 % MPC settings
 %==========================================================================    
     Tfinal = 1.0*10;         % Tfinal for simulation
     N      = 11;             % Number of nodes (horizon)
-    Th     = 0.5;            % MPC Time horizon
+    Th     = 0.1*0.5;            % MPC Time horizon
     Tc     = 0.1;            % Control Time horizon
     tmeasure = 0.0;        % initial time (do not change)
+    plot_Th = 0.5;
 %==========================================================================    
 % System Parameters
 %==========================================================================        
@@ -40,15 +40,15 @@ close all
     params.Th = Th;
 
 %%
-M = readmatrix("data/data2_2023_11_09-08_08_50_PM.csv");
-u2 = readmatrix("data/u_nov9_2008.csv");
+M = readmatrix("data/data2_2023_11_15-06_55_23_PM.csv");
+u2 = readmatrix("data/u_nov15_1854.csv");
 
 time = M(1,:);
 ball_pos = M(2,:);
 arm_acc = M(3,:);
 ball_vel1 = M(4,:);
-ball_acc1 = M(5,:);
-ball_jerk1 = M(6,:);
+ball_acc1 = 0.1*M(5,:);
+ball_jerk1 = 0.0001*M(6,:);
 
 
 
@@ -69,16 +69,16 @@ n = size(ball_pos,2);
 
 %%
 
-xl = [time(1),time(end)];
+xl = [time(1),time(end)+0.5];
 
 ylp = [-.7 -.4]; 
-ylp = [-10 100]; 
+% ylp = [-10 100]; 
 ylv = [min(ball_vel1) max(ball_vel1)]; 
 yla = [min(ball_acc1) max(ball_acc1)]; 
 ylj = [min(ball_jerk1) max(ball_jerk1)]; 
 
 xlarm = xl;
-xlarm(2) = xl(2) + 0.5;
+xlarm(2) = xl(2);
 ylarm = [min(u2,[],"all") max(u2,[],"all")]; 
 
 % p_ax = [-0.1 10.1 -.75 -.5];
@@ -87,13 +87,14 @@ ylarm = [min(u2,[],"all") max(u2,[],"all")];
 % j_ax = [-0.1 10.1 -141.8087 221.1771];
 
 
-t_traj = 0:Th/10:Th;
+t_traj = 0:plot_Th/10:plot_Th;
 
 for i=1:n
     subplot(4,2,1)
+    % subplot(1,2,1)
 
     % generate x traj
-    x0 = [ball_pos(i), ball_vel1(i),ball_acc1(i), ball_jerk1(i)];
+    x0 = [ball_pos(i), ball_vel1(i), ball_acc1(i), ball_jerk1(i)];
     x_traj = computeOpenloopSolution(@system, N, Th, 0, x0, u2(i,:), 0, 0, params);
 
     plot(time(1:i),ball_pos(1:i),'.-b',"MarkerSize",12)
@@ -154,6 +155,7 @@ for i=1:n
 
 
     subplot(4,2,[2 4 6 8])
+    % subplot(1,2,2)
     plot(time(1:i),arm_acc(1:i),'.-b',"MarkerSize",12)
     hold on
     plot(time(i)+[0:.5/10:.5],u2(i,:),'.-r',"MarkerSize",12)
@@ -161,7 +163,7 @@ for i=1:n
     hold off
     % axis([0-.1 .5+.1 -0.21 .21])
     xlim(xlarm)
-    ylim(ylarm)        
+    ylim(ylarm+[-0.1,0.1])        
     ylabel('Acceleration(m/s^2)',"FontSize",16)
     title('Control input trajectory - Acceleration',"FontSize",22)
     xlabel('Time(s)',"FontSize",16)    
