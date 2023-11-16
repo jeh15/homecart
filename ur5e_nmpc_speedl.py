@@ -153,7 +153,7 @@ iteration = 0
 # setting joint limit
 joint_angles = rtde_r.getActualQ()
 joint_angles = [i *180.0/math.pi for i in joint_angles]
-angle_range = [-104,-80]
+angle_range = [75,105]
 # -----------------------------------------------------------
 
 
@@ -168,9 +168,11 @@ j_ratio = j_delta/max(abs(j_delta))
 ball_x = -0.5
 ball_range = [-7,-3]
 
+# Fixed acceleration
+fix_ur5_acc = 1.0
 
 try:
-    while ((time.time() - initial_time) < test_duration) and (int(ball_x*10.0) in range(ball_range[0],ball_range[1]) ):
+    while ((time.time() - initial_time) < test_duration) and (int(joint_angles[4]) in range(angle_range[0],angle_range[1]) ):
 
         # print time now
         time_now = time.time() - initial_time
@@ -227,7 +229,7 @@ try:
         js_inc = speed_increaseX
         tool_speed[4] += js_inc
         # rtde_c.speedL(tool_speed, min(abs(ax),max_ax),0.0001)
-        rtde_c.speedL(tool_speed, 1.0,0.0001)
+        rtde_c.speedL(tool_speed, fix_ur5_acc, 0.0001)
 
         # record data
 
