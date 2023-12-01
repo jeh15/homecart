@@ -154,6 +154,9 @@ iteration = 0
 joint_angles = rtde_r.getActualQ()
 joint_angles = [i *180.0/math.pi for i in joint_angles]
 angle_range = [70,100]
+
+target = rtde_r.getActualTCPPose()
+
 # -----------------------------------------------------------
 
 
@@ -170,6 +173,7 @@ ball_range = [-7,-3]
 
 # Fixed acceleration
 fix_ur5_acc = 1.0
+fix_ur5_vel = 0.5
 
 try:
     while ((time.time() - initial_time) < test_duration) and (int(joint_angles[4]) in range(angle_range[0],angle_range[1]) ):
@@ -192,20 +196,20 @@ try:
 
         ball_pos_data = np.append(ball_pos_data,pos[0])
         ball_vel_data = np.append(ball_vel_data,vel[0])
-        ball_acc_data = np.append(ball_acc_data,acc[0])
-        ball_jerk_data = np.append(ball_jerk_data,jerk[0])
+        # ball_acc_data = np.append(ball_acc_data,acc[0])
+        # ball_jerk_data = np.append(ball_jerk_data,jerk[0])
 
         if iteration > 5:
             # v_avg = np.mean(ball_vel_data[-3:])
             # a_avg = np.mean(ball_acc_data[-3:])
             # j_avg = np.mean(ball_jerk_data[-5:])
             v_avg = np.mean(ball_vel_data[-5:])
-            a_avg = np.mean(ball_acc_data[-5:])
-            j_avg = np.mean(ball_jerk_data[-5:])
-            q = [pos[0], v_avg, a_avg, j_avg]
+            # a_avg = np.mean(ball_acc_data[-5:])
+            # j_avg = np.mean(ball_jerk_data[-5:])
+            q = [pos[0], v_avg, 0, 0]
             last_pos = copy.deepcopy(pos)
             last_vel = copy.deepcopy([v_avg,0.,0.])
-            last_acc = copy.deepcopy([a_avg,0.,0.])            
+            # last_acc = copy.deepcopy([a_avg,0.,0.])            
         else:
             q = [pos[0], vel[0], acc[0], jerk[0]]
             last_pos = copy.deepcopy(pos)
@@ -219,20 +223,26 @@ try:
         accx = matlab.double([q[2]])
         jerkx = matlab.double([q[3]])
 
-        # find cmd to balance the ball
-        ax = eng.nmpc_test2(posx, velx, accx, jerkx, xt, nargout=1)
-        ax_data = np.append(ax_data, ax)
+        # find cmd to balance the ball (angle)
+        # rtde_c.stopL(5.0)
+        ang = eng.nmpc_angle(posx, velx, xt, nargout=1)
+        ax_data = np.append(ax_data, ang)
         dt = time.time() - arm_last_time
         arm_last_time = time.time()
-        speed_increaseX = 1.*ax*dt
-        vx_inc_data = np.append(vx_inc_data, speed_increaseX)
         time_data = np.append(time_data, time.time() - initial_time)
         # joint_speed[4] += speed_increaseX
 
-        js_inc = speed_increaseX
-        tool_speed[4] += js_inc
         # rtde_c.speedL(tool_speed, min(abs(ax),max_ax),0.0001)
-        rtde_c.speedL(tool_speed, fix_ur5_acc, 0.0001)
+        # rtde_c.speedL(tool_speed, fix_ur5_acc, 0.0001)
+        m_ang = -1.0*ang
+        if m_ang > 0.0:
+            ang2 = np.pi - m_ang
+        elif m_ang < 0.0:
+            ang2 = -np.pi - m_ang
+        else:
+            ang2 = 0.0
+        target[4] = ang2
+        rtde_c.moveL(target, fix_ur5_vel, fix_ur5_acc, True)
 
         # record data
 
@@ -251,9 +261,9 @@ finally:
     # np.savetxt('data.csv', data, delimiter=',')
 
 
-    data = np.vstack((time_data,  ball_pos_data, ax_data, ball_vel_data, ball_acc_data, ball_jerk_data ))
+    data = np.vstack((time_data,  ball_pos_data, ax_data, ball_vel_data ))
     timestamp = datetime.now().strftime("%Y_%m_%d-%I_%M_%S_%p")
-    filename = "./data/data2_" + timestamp + ".csv"
+    filename = "./data/data_movel_" + timestamp + ".csv"
     np.savetxt(filename, data, delimiter=',')
     out.release()
     cv2.destroyAllWindows()

@@ -3,25 +3,40 @@ import rtde_receive
 import time
 
 rtde_c = RTDEControl("192.168.5.30")
+rtde_r = rtde_receive.RTDEReceiveInterface("192.168.5.30")
 
-# Parameters
-acceleration = 0.5
-dt = 1.0/500  # 2ms
-# joint_q = [-1.54, -1.83, -2.28, -0.59, 1.60, 0.023]
+# # Parameters
+target = rtde_r.getActualTCPPose()
 
-# x y z rx ry rz
-tool_speed = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+print('#0:',rtde_r.getActualTCPPose()[4])
 
-# Move to initial joint position with a regular moveJ
-# rtde_c.moveJ(joint_q)
+target[4] -= 0.1
+rtde_c.moveL(target, 2.0, 2.0, True)
+time.sleep(0.1)
+rtde_c.stopL(2.0)
 
-# Execute 500Hz control loop for 2 seconds, each cycle is 2ms
-for i in range(1000):
-    t_start = rtde_c.initPeriod()
-    rtde_c.speedL(tool_speed, acceleration, dt)
-    tool_speed[4] += 0.0001
-    # joint_speed[1] += 0.0005
-    rtde_c.waitPeriod(t_start)
+print('#1:',rtde_r.getActualTCPPose()[4])
 
-rtde_c.speedStop()
-rtde_c.stopScript()
+target[4] -= 0.1
+rtde_c.moveL(target, 2.0, 2.0, True)
+time.sleep(0.1)
+rtde_c.stopL(2.0)
+
+print('#2:',rtde_r.getActualTCPPose()[4])
+
+target[4] -= 0.1
+rtde_c.moveL(target, 2.0, 2.0, True)
+time.sleep(0.1)
+rtde_c.stopL(2.0)
+
+print('#3:',rtde_r.getActualTCPPose()[4])
+
+target[4] -= 0.1
+rtde_c.moveL(target, 2.0, 2.0, True)
+time.sleep(0.1)
+rtde_c.stopL(2.0)
+
+print('#4:',rtde_r.getActualTCPPose()[4])
+
+
+# rtde_c.stopScript()

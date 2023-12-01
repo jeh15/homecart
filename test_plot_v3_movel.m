@@ -16,10 +16,8 @@ close all
 % System Parameters
 %==========================================================================        
     % q - [x dx ddx dddx] - { x - distance along pan(inclined plane) }
-    Ac = [0  1  0  0;...
-          0  0  1  0;...
-          0  0  0  1;...
-          0  0  0  0;];
+    Ac = [0  1 ;...
+          0  0 ];
     
     m   = 0.003;            % Mass              [kg]
     R   = 0.02;
@@ -27,10 +25,8 @@ close all
     g   = 9.81;             % Gravity           [m/s2]
     K = m*g / (m+Jz/R^2);
     Bc = [0;
-          0;
-          0;
           K];
-    Cc = [1 0 0 0];
+    Cc = [1 0];
     Dc = 0;
     [sysd,G] = c2d(ss(Ac,Bc,Cc,Dc),Th,'zoh');
     sysA = sysd.A;
@@ -40,30 +36,33 @@ close all
     params.Th = Th;
 
 %%
-M = readmatrix("data/data2_2023_11_17-01_23_10_PM.csv");
-u2 = readmatrix("data/u_nov17_1322.csv");
+M = readmatrix("data/data_movel_2d_2023_11_29-08_08_55_PM.csv");
+u2 = readmatrix("data/u2_nov29_2000.csv");
+
+
+u2 = u2(55-12:end,:);
+
 
 time = M(1,:);
 ball_pos = M(2,:);
-arm_acc = M(3,:);
-ball_vel1 = M(4,:);
-ball_acc1 = 0.1*M(5,:);
-ball_jerk1 = 0.0001*M(6,:);
+ball_vel = M(3,:);
+arm_angle = M(4,:);
+target_angle = M(5,:);
 
 
 
 
-subplot(4,1,1)
-plot(time,ball_pos,'.-r')
-
-subplot(4,1,2)
-plot(time,ball_vel1,'.-r')
-
-subplot(4,1,3)
-plot(time,ball_acc1,'.-r')
-
-subplot(4,1,4)
-plot(time,ball_jerk1,'.-r')
+% subplot(4,1,1)
+% plot(time,ball_pos,'.-r')
+% 
+% subplot(4,1,2)
+% plot(time,ball_vel1,'.-r')
+% 
+% subplot(4,1,3)
+% plot(time,ball_acc1,'.-r')
+% 
+% subplot(4,1,4)
+% plot(time,ball_jerk1,'.-r')
 
 n = size(ball_pos,2);
 
@@ -71,15 +70,14 @@ n = size(ball_pos,2);
 
 xl = [time(1),time(end)+0.5];
 
-ylp = [-.7 -.4]; 
+ylp = [-.7 -.2]; 
 % ylp = [-10 100]; 
-ylv = [min(ball_vel1) max(ball_vel1)]; 
-yla = [min(ball_acc1) max(ball_acc1)]; 
-ylj = [min(ball_jerk1) max(ball_jerk1)]; 
+ylv = [min(ball_vel) max(ball_vel)]; 
 
 xlarm = xl;
 xlarm(2) = xl(2);
-ylarm = [min(u2,[],"all") max(u2,[],"all")]; 
+% ylarm = [min(u2,[],"all") max(u2,[],"all")]; 
+ylarm = [-3 3]; 
 
 % p_ax = [-0.1 10.1 -.75 -.5];
 % v_ax = [-0.1 10.1 -0.2416 0.1679];
@@ -90,11 +88,11 @@ ylarm = [min(u2,[],"all") max(u2,[],"all")];
 t_traj = 0:plot_Th/10:plot_Th;
 
 for i=1:n
-    subplot(4,2,1)
+    subplot(2,2,1)
     % subplot(1,2,1)
 
     % generate x traj
-    x0 = [ball_pos(i), ball_vel1(i), ball_acc1(i), ball_jerk1(i)];
+    x0 = [ball_pos(i), ball_vel(i)];
     x_traj = computeOpenloopSolution(@system, N, Th, 0, x0, u2(i,:), 0, 0, params);
 
     plot(time(1:i),ball_pos(1:i),'.-b',"MarkerSize",12)
@@ -115,8 +113,8 @@ for i=1:n
     ax.FontSize = 16;
 
 
-    subplot(4,2,3)
-    plot(time(1:i),ball_vel1(1:i),'.-b',"MarkerSize",12)
+    subplot(2,2,3)
+    plot(time(1:i),ball_vel(1:i),'.-b',"MarkerSize",12)
     % axis(v_ax)
     xlim(xl)
     ylim(ylv)
@@ -128,35 +126,13 @@ for i=1:n
     ax.FontSize = 16;
 
 
-    subplot(4,2,5)
-    plot(time(1:i),ball_acc1(1:i),'.-b',"MarkerSize",12)
-    % axis(a_ax)
-    xlim(xl)
-    ylim(yla)    
-    ylabel('Acceleration(m/s^2)',"FontSize",16)
-    title('Acceleration',"FontSize",22)
-    xlabel('Time(s)',"FontSize",16)
-
-    ax = gca;
-    ax.FontSize = 16;
 
 
-    subplot(4,2,7)
-    plot(time(1:i),ball_jerk1(1:i),'.-b',"MarkerSize",12)
-    % axis(j_ax)
-    xlim(xl)
-    ylim(ylj)    
-    ylabel('Jerk(m/s^3)',"FontSize",16)
-    xlabel('Time(s)',"FontSize",22)
-    title('Jerk',"FontSize",16)
-
-    ax = gca;
-    ax.FontSize = 16;
 
 
-    subplot(4,2,[2 4 6 8])
+    subplot(4,2,[2 4])
     % subplot(1,2,2)
-    plot(time(1:i),arm_acc(1:i),'.-b',"MarkerSize",12)
+    plot(time(1:i),arm_angle(1:i),'.-b',"MarkerSize",12)
     hold on
     plot(time(i)+[0:.5/10:.5],u2(i,:),'.-r',"MarkerSize",12)
     plot([min(time) max(time)],[0 0],'--r')    
@@ -184,23 +160,23 @@ function y = system(t, x, u, Th, apply_flag, sig, params)
     A = params.sysA;
     B = params.sysB;
     % K = [0.8151    2.7097   11.8373    3.7545];    
-    K = [0,0,0,0];
+    K = [0,0];
 
 
-    y = A*x'+B*(u(1,1) - K*[x(1); x(2); x(3); x(4)]);
+    y = A*x'+B*(u(1,1) - K*[x(1); x(2)]);
     
-    if apply_flag == 1
-        D = [0 0 0 0;
-             0 0 0 0;
-             0 0 1 0;
-             0 0 0 0];
-        w = [0;0;0;0];
-        w(1) = normrnd(0,sig);
-        w(2) = normrnd(0,sig);
-        w(3) = normrnd(0,sig);
-        w(4) = normrnd(0,sig);
-        y = y + D*w;
-    end
+    % if apply_flag == 1
+    %     D = [0 0 0 0;
+    %          0 0 0 0;
+    %          0 0 1 0;
+    %          0 0 0 0];
+    %     w = [0;0;0;0];
+    %     w(1) = normrnd(0,sig);
+    %     w(2) = normrnd(0,sig);
+    %     w(3) = normrnd(0,sig);
+    %     w(4) = normrnd(0,sig);
+    %     y = y + D*w;
+    % end
     y = y';    
 end
 %==========================================================================

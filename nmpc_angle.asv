@@ -1,4 +1,4 @@
-function out = nmpc_test2(x1,x2,x3,x4,xt)            
+function out = nmpc_angle(x1,x2,x3,x4,xt)            
 %==========================================================================    
 % Goal: Solve the tossing of a mass into a bowl problem
 % 
@@ -21,13 +21,13 @@ function out = nmpc_test2(x1,x2,x3,x4,xt)
     Th     = 0.1*0.5;            % MPC Time horizon
     Tc     = 0.1;            % Control Time horizon
     % xmeasure = [xx 0.0 0.0 0.0];     % initial [x dx ddx dddx] (last ur5e link)
-    xmeasure = [x1 x2 0.1*x3 0.0001*x4];     % initial [x dx ddx dddx] (last ur5e link)
+    xmeasure = [x1 x2];     % initial [x dx ddx dddx] (last ur5e link)
     tmeasure = 0.0;        % initial time (do not change)
 
     % control input settings
     u0   = 0.05*ones(1,N);  % initial input guess
     ulim = 1.0;
-    filename = 'data/u_nov17_1333.csv';
+    filename = 'data/u2_nov17_1333.csv';
     % costQ =  4*10000.0*[1    0   0  0;
     costQ =  1.0*[0.0    0   0  0;
                   0   0.1   0  0;
@@ -66,10 +66,8 @@ function out = nmpc_test2(x1,x2,x3,x4,xt)
     
     % q - [x dx ddx dddx] - { x - distance along pan(inclined plane) }
     
-    Ac = [0  1  0  0;...
-          0  0  1  0;...
-          0  0  0  1;...
-          0  0  0  0;];
+    Ac = [0  1;...
+          0  0];
     
     m   = 0.003;            % Mass              [kg]
     R   = 0.017;
@@ -79,11 +77,9 @@ function out = nmpc_test2(x1,x2,x3,x4,xt)
     K = m*g / (m+Jz/R^2);
         
     Bc = [0;
-          0;
-          0;
           K];
     
-    Cc = [1 0 0 0];
+    Cc = [1 0];
     Dc = 0;
     
     [sysd,G] = c2d(ss(Ac,Bc,Cc,Dc),Th,'zoh');
@@ -220,7 +216,7 @@ function out = nmpc_test2(x1,x2,x3,x4,xt)
     
     
 
-    out = u_new(1   );
+    out = u_new(1);
 end
 
 %==========================================================================

@@ -1,4 +1,4 @@
-function out = nmpc_test2(x1,x2,x3,x4,xt)            
+function out = nmpc_angle3d(x1,x2,x3,xt)            
 %==========================================================================    
 % Goal: Solve the tossing of a mass into a bowl problem
 % 
@@ -21,19 +21,18 @@ function out = nmpc_test2(x1,x2,x3,x4,xt)
     Th     = 0.1*0.5;            % MPC Time horizon
     Tc     = 0.1;            % Control Time horizon
     % xmeasure = [xx 0.0 0.0 0.0];     % initial [x dx ddx dddx] (last ur5e link)
-    xmeasure = [x1 x2 0.1*x3 0.0001*x4];     % initial [x dx ddx dddx] (last ur5e link)
+    xmeasure = [x1 x2, x3];     % initial [x dx ddx dddx] (last ur5e link)
     tmeasure = 0.0;        % initial time (do not change)
 
     % control input settings
     u0   = 0.05*ones(1,N);  % initial input guess
-    ulim = 1.0;
-    filename = 'data/u_nov17_1333.csv';
+    ulim = 2.0;
+    filename = 'data/u3_dec1_1316.csv';
     % costQ =  4*10000.0*[1    0   0  0;
-    costQ =  1.0*[0.0    0   0  0;
-                  0   0.1   0  0;
-                  0    0   0.0  0;
-                  0    0   0  0];
-    costR = 1e-6;
+    costQ =  1.0*[1.0    0.0    0.0  ;
+                  0.0    1.0    0.0  ;
+                  0.0    0.0    1.0  ];
+    costR = .000000001;
 
     % task state constraint - set state limits
     sig = 20*.1*.1*0.08;             % sigma of Gaussian distribution -> covariance matrix with sigma^2 (here: uncertainty considered)
@@ -66,24 +65,22 @@ function out = nmpc_test2(x1,x2,x3,x4,xt)
     
     % q - [x dx ddx dddx] - { x - distance along pan(inclined plane) }
     
-    Ac = [0  1  0  0;...
-          0  0  1  0;...
-          0  0  0  1;...
-          0  0  0  0;];
+    Ac = [0  1  0;...
+          0  0  1;...
+          0  0  0];
     
     m   = 0.003;            % Mass              [kg]
     R   = 0.017;
     Jz  = .5*m*R^2;    % Moment of inertia [kg.m2]
     g   = 9.81;             % Gravity           [m/s2]
     
-    K = m*g / (m+Jz/R^2);
+    K = m*g / (m+(Jz/R^2));
         
     Bc = [0;
           0;
-          0;
           K];
     
-    Cc = [1 0 0 0];
+    Cc = [1 0 0];
     Dc = 0;
     
     [sysd,G] = c2d(ss(Ac,Bc,Cc,Dc),Th,'zoh');
@@ -203,12 +200,14 @@ function out = nmpc_test2(x1,x2,x3,x4,xt)
 %==========================================================================        
     [t0, x0] = measureInitialValue ( tmeasure, xmeasure );
     t_Start = tic;
+    tic
     [u_new, V_current, exitflag, output] = solveOptimalControlProblem ...
         (@runningcosts, @terminalcosts, @constraints, ...
         @terminalconstraints, @linearconstraints, @system, @cov_propagation, ...
         N, t0, x0, u0, Th, ...
         sig, beta, params, ...
         atol_ode_sim, rtol_ode_sim, tol_opt, options, type);
+    toc
     t_Elapsed = toc( t_Start );
 
     printSolution(@system, @printHeader, @printClosedloopData, ...
@@ -220,7 +219,7 @@ function out = nmpc_test2(x1,x2,x3,x4,xt)
     
     
 
-    out = u_new(1   );
+    out = u_new(1);
 end
 
 %==========================================================================
@@ -313,13 +312,13 @@ function [c,ceq] = nonlinearconstraints(constraints, ...
     % compute covariance matrix propagation
     % sigma_e = cov_propagation(N, sig,params);    
     % g = [-1;0];              % constraint: g*x < h -> x1 < x1_limit
-    g1 = [0;0;0;0];              % constraint: g*x < h -> x1 < x1_limit
-    g2 = [0;0;0;0];              % constraint: g*x < h -> x1 < x1_limit
-    
-    g1(params.state) = -1; % min
-    g2(params.state) = 1;  % max
+    % g1 = [0;0;0;0];              % constraint: g*x < h -> x1 < x1_limit
+    % g2 = [0;0;0;0];              % constraint: g*x < h -> x1 < x1_limit
+    % 
+    % g1(params.state) = -1; % min
+    % g2(params.state) = 1;  % max
 
-    K = [0,0,0,0];
+    K = [0,0];
     
     for k=1:N               % k=1 refers to the initial state, so (technically) no state constraint necessary, but k=1 necessary for input constraint
 
@@ -378,7 +377,7 @@ function cost = runningcosts(t, x, u,params)
 
     Q = params.costQ;
     R = params.costR;
-    xd = [xt,0,0,0];
+    xd = [xt,0,0];
     cost = (x-xd)*Q*(x-xd)' + u(1)*R*u(1)';
     
 % next two lines only necessary for slack variable
@@ -401,11 +400,11 @@ function [c,ceq] = constraints(t, x, u, gamma1, gamma2, K, params)
     x1_limit = params.x1_limit;                       % get x1 constraint    
     ulim = params.ulim;                       % get x1 constraint    
     c   = [];
-    K = [0,0,0,0];
+    K = [0,0,0];
    
     % Control limit
-    c(end+1) = (u(1) - K*[x(1); x(2); x(3); x(4)]) - ulim;
-    c(end+1) = -(u(1) - K*[x(1); x(2); x(3); x(4)]) - ulim;
+    c(end+1) = (u(1) - K*[x(1); x(2); x(3)]) - ulim;
+    c(end+1) = -(u(1) - K*[x(1); x(2); x(3)]) - ulim;
 
 %==========================================================================
 %       SMPC settings
@@ -444,47 +443,43 @@ function y = system(t, x, u, Th, apply_flag, sig, params)
     A = params.sysA;
     B = params.sysB;
     % K = [0.8151    2.7097   11.8373    3.7545];    
-    K = [0,0,0,0];
+    K = [0,0,0];
     
-    y = A*x'+B*(u(1,1) - K*[x(1); x(2); x(3); x(4)]);
-    
-    if apply_flag == 1
-        D = [0 0 0 0;
-             0 0 0 0;
-             0 0 1 0;
-             0 0 0 0];
-        w = [0;0;0;0];
-        w(1) = normrnd(0,sig);
-        w(2) = normrnd(0,sig);
-        w(3) = normrnd(0,sig);
-        w(4) = normrnd(0,sig);
-        y = y + D*w;
-    end
+    y = A*x'+B*(u(1,1) - K*[x(1); x(2); x(3)]);
+    % 
+    % if apply_flag == 1
+    %     D = [0 0 0 0;
+    %          0 0 0 0;
+    %          0 0 1 0;
+    %          0 0 0 0];
+    %     w = [0;0;0;0];
+    %     w(1) = normrnd(0,sig);
+    %     w(2) = normrnd(0,sig);
+    %     w(3) = normrnd(0,sig);
+    %     w(4) = normrnd(0,sig);
+    %     y = y + D*w;
+    % end
     y = y';    
 end
 %==========================================================================
 %                           cov propagation
 %==========================================================================
 function sigma_e = cov_propagation(N, sig, params)
-    w_cov = [sig^2 0 0 0;
-             0 sig^2 0 0;
-             0 0 sig^2 0;
-             0 0 0 sig^2];
+    w_cov = [sig^2 0;
+             0 sig^2];
     A = params.sysA;
     B = params.sysB;
 %==========================================================================
 %       SMPC settings
 %==========================================================================            
     
-    K = [0 0 0 0];    
-    D = [0 0 0 0;
-         0 0 0 0;
-         0 0 1 0;
-         0 0 0 0];
+    K = [0 0];    
+    D = [0 0;
+         1 0;];
 
     phi = A-B*K;
 
-    sigma_e = zeros(4,4,N);
+    sigma_e = zeros(2,2,N);
 
     for i = 2:N
         sigma_e(:,:,i) = phi*sigma_e(:,:,i-1)*phi' + D*w_cov*D';

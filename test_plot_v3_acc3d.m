@@ -16,21 +16,19 @@ close all
 % System Parameters
 %==========================================================================        
     % q - [x dx ddx dddx] - { x - distance along pan(inclined plane) }
-    Ac = [0  1  0  0;...
-          0  0  1  0;...
-          0  0  0  1;...
-          0  0  0  0;];
+    Ac = [0  1  0;...
+          0  0  1;...
+          0  0  0];
     
     m   = 0.003;            % Mass              [kg]
     R   = 0.02;
     Jz  = .5*m*R^2;    % Moment of inertia [kg.m2]
     g   = 9.81;             % Gravity           [m/s2]
     K = m*g / (m+Jz/R^2);
-    Bc = [0;
-          0;
+    Bc = [0;          
           0;
           K];
-    Cc = [1 0 0 0];
+    Cc = [1 0 0];
     Dc = 0;
     [sysd,G] = c2d(ss(Ac,Bc,Cc,Dc),Th,'zoh');
     sysA = sysd.A;
@@ -40,15 +38,18 @@ close all
     params.Th = Th;
 
 %%
-M = readmatrix("data/data2_2023_11_17-01_23_10_PM.csv");
-u2 = readmatrix("data/u_nov17_1322.csv");
+M = readmatrix("data/data_movel_2d_2023_12_01-01_11_27_PM.csv");
+u2 = readmatrix("data/u3_dec1_1310.csv");
 
 time = M(1,:);
 ball_pos = M(2,:);
-arm_acc = M(3,:);
-ball_vel1 = M(4,:);
-ball_acc1 = 0.1*M(5,:);
-ball_jerk1 = 0.0001*M(6,:);
+
+% control input - rot vel
+arm_acc = M(5,:);
+
+ball_vel1 = M(3,:);
+ball_acc1 = M(4,:);
+ball_jerk1 = 0.0*M(4,:);
 
 
 
@@ -71,7 +72,7 @@ n = size(ball_pos,2);
 
 xl = [time(1),time(end)+0.5];
 
-ylp = [-.7 -.4]; 
+ylp = [-.7 -.2]; 
 % ylp = [-10 100]; 
 ylv = [min(ball_vel1) max(ball_vel1)]; 
 yla = [min(ball_acc1) max(ball_acc1)]; 
@@ -94,7 +95,7 @@ for i=1:n
     % subplot(1,2,1)
 
     % generate x traj
-    x0 = [ball_pos(i), ball_vel1(i), ball_acc1(i), ball_jerk1(i)];
+    x0 = [ball_pos(i), ball_vel1(i), ball_acc1(i)];
     x_traj = computeOpenloopSolution(@system, N, Th, 0, x0, u2(i,:), 0, 0, params);
 
     plot(time(1:i),ball_pos(1:i),'.-b',"MarkerSize",12)
@@ -145,7 +146,7 @@ for i=1:n
     plot(time(1:i),ball_jerk1(1:i),'.-b',"MarkerSize",12)
     % axis(j_ax)
     xlim(xl)
-    ylim(ylj)    
+    % ylim(ylj)    
     ylabel('Jerk(m/s^3)',"FontSize",16)
     xlabel('Time(s)',"FontSize",22)
     title('Jerk',"FontSize",16)
@@ -184,10 +185,10 @@ function y = system(t, x, u, Th, apply_flag, sig, params)
     A = params.sysA;
     B = params.sysB;
     % K = [0.8151    2.7097   11.8373    3.7545];    
-    K = [0,0,0,0];
+    K = [0,0,0];
 
 
-    y = A*x'+B*(u(1,1) - K*[x(1); x(2); x(3); x(4)]);
+    y = A*x'+B*(u(1,1));
     
     if apply_flag == 1
         D = [0 0 0 0;

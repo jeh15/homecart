@@ -3,13 +3,12 @@ clear
 close all
 
 %%
-
 %==========================================================================    
 % MPC settings
 %==========================================================================    
     Tfinal = 1.0*10;         % Tfinal for simulation
     N      = 11;             % Number of nodes (horizon)
-    Th     = 0.5;            % MPC Time horizon
+    Th     = 0.1*0.5;            % MPC Time horizon
     Tc     = 0.1;            % Control Time horizon
     tmeasure = 0.0;        % initial time (do not change)
     plot_Th = 0.5;
@@ -17,21 +16,19 @@ close all
 % System Parameters
 %==========================================================================        
     % q - [x dx ddx dddx] - { x - distance along pan(inclined plane) }
-    Ac = [0  1  0  0;...
-          0  0  1  0;...
-          0  0  0  1;...
-          0  0  0  0;];
+    Ac = [0  1  0;...
+          0  0  1;...
+          0  0  0];
     
     m   = 0.003;            % Mass              [kg]
     R   = 0.02;
     Jz  = .5*m*R^2;    % Moment of inertia [kg.m2]
     g   = 9.81;             % Gravity           [m/s2]
     K = m*g / (m+Jz/R^2);
-    Bc = [0;
-          0;
+    Bc = [0;          
           0;
           K];
-    Cc = [1 0 0 0];
+    Cc = [1 0 0];
     Dc = 0;
     [sysd,G] = c2d(ss(Ac,Bc,Cc,Dc),Th,'zoh');
     sysA = sysd.A;
@@ -41,15 +38,18 @@ close all
     params.Th = Th;
 
 %%
-M = readmatrix("data/data2_2023_11_14-10_56_21_PM.csv");
-u2 = readmatrix("data/u_nov14_2255.csv");
+M = readmatrix("data/data_movel_2d_2023_12_01-12_15_59_PM.csv");
+u2 = readmatrix("data/u3_dec1_1215.csv");
 
 time = M(1,:);
 ball_pos = M(2,:);
-arm_acc = M(3,:);
-ball_vel1 = M(4,:);
-ball_acc1 = M(5,:);
-ball_jerk1 = M(6,:);
+
+% control input - rot vel
+arm_acc = M(4,:);
+
+ball_vel1 = M(3,:);
+ball_acc1 = M(4,:);
+ball_jerk1 = 0.0001*M(5,:);
 
 
 
@@ -70,16 +70,16 @@ n = size(ball_pos,2);
 
 %%
 
-xl = [time(1),time(end)];
+xl = [time(1),time(end)+0.5];
 
-% ylp = [-.7 -.4]; 
+ylp = [-.7 -.4]; 
 % ylp = [-10 100]; 
 ylv = [min(ball_vel1) max(ball_vel1)]; 
 yla = [min(ball_acc1) max(ball_acc1)]; 
 ylj = [min(ball_jerk1) max(ball_jerk1)]; 
 
 xlarm = xl;
-xlarm(2) = xl(2) + 0.5;
+xlarm(2) = xl(2);
 ylarm = [min(u2,[],"all") max(u2,[],"all")]; 
 
 % p_ax = [-0.1 10.1 -.75 -.5];
@@ -92,9 +92,10 @@ t_traj = 0:plot_Th/10:plot_Th;
 
 for i=1:n
     subplot(4,2,1)
+    % subplot(1,2,1)
 
     % generate x traj
-    x0 = [ball_pos(i), ball_vel1(i),ball_acc1(i), ball_jerk1(i)];
+    x0 = [ball_pos(i), ball_vel1(i), ball_acc1(i)];
     x_traj = computeOpenloopSolution(@system, N, Th, 0, x0, u2(i,:), 0, 0, params);
 
     plot(time(1:i),ball_pos(1:i),'.-b',"MarkerSize",12)
@@ -106,7 +107,7 @@ for i=1:n
     hold off
     % axis(p_ax)
     xlim(xl)
-    % ylim(ylp)
+    ylim(ylp)
     ylabel('Position(m)',"FontSize",16)
     title('Position',"FontSize",22)
     xlabel('Time(s)',"FontSize",16)
@@ -155,6 +156,7 @@ for i=1:n
 
 
     subplot(4,2,[2 4 6 8])
+    % subplot(1,2,2)
     plot(time(1:i),arm_acc(1:i),'.-b',"MarkerSize",12)
     hold on
     plot(time(i)+[0:.5/10:.5],u2(i,:),'.-r',"MarkerSize",12)
@@ -162,7 +164,7 @@ for i=1:n
     hold off
     % axis([0-.1 .5+.1 -0.21 .21])
     xlim(xlarm)
-    ylim(ylarm)        
+    ylim(ylarm+[-0.1,0.1])        
     ylabel('Acceleration(m/s^2)',"FontSize",16)
     title('Control input trajectory - Acceleration',"FontSize",22)
     xlabel('Time(s)',"FontSize",16)    
@@ -183,10 +185,10 @@ function y = system(t, x, u, Th, apply_flag, sig, params)
     A = params.sysA;
     B = params.sysB;
     % K = [0.8151    2.7097   11.8373    3.7545];    
-    K = [0,0,0,0];
+    K = [0,0,0];
 
 
-    y = A*x'+B*(u(1,1) - K*[x(1); x(2); x(3); x(4)]);
+    y = A*x'+B*(u(1,1));
     
     if apply_flag == 1
         D = [0 0 0 0;
