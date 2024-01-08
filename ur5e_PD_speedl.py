@@ -186,6 +186,9 @@ fix_ur5_vel = 0.5
 
 maxvel = 2.0
 
+kp = 20*0.5
+kd = 2*0.1
+
 try:
     while ((time.time() - initial_time) < test_duration) and (int(joint_angles[4]) in range(angle_range[0],angle_range[1]) ):
 
@@ -233,9 +236,10 @@ try:
         # vt = eng.nmpc_angle3d(posx, velx, accx, xt, nargout=1)
         qd_i = matlab.double([[q[0]], [q[1]], [q[2]]])
         qd_des = matlab.double([[xt], [0.0], [0.0]])
-        [qd,ud] = eng.RunMPC6(Th,Nodes,qd_i,qd_des,xd_lb,xd_ub,nargout=2)
+        # [qd,ud] = eng.RunMPC6(Th,Nodes,qd_i,qd_des,xd_lb,xd_ub,nargout=2)
         # vt = -ud[0][1]
-        vt = -ud[0][0]
+        # vt = -ud[0][0]
+        vt = ( kp*(xt - q[0]) + kd*(0 - q[1]))
 
         vt_clip = np.clip(vt, -maxvel, maxvel)
 

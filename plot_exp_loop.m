@@ -1,6 +1,6 @@
 clc;clear;close all;
 
-M = readmatrix("data/data_movel_2d_2023_12_14-03_13_30_PM.csv");
+M = readmatrix("data/data_movel_2d_2024_01_08-05_45_47_PM.csv");
 
 
 time = M(1,:);
@@ -12,7 +12,7 @@ target_vel = M(5,:);
 
 %%
 
-pt = -0.4917839320927865;
+pt = -0.5189370547353503;
 target = pt*ones(size(time));
 
 subplot(4,1,1)
@@ -113,7 +113,7 @@ for i=1:size(time,2)
     % subplot(1,2,2)
     plot(time(1:i),target_vel(1:i),'.-b',"MarkerSize",12)
     hold on
-    plot(time(i)+t_traj,-u_traj,'.-r',"MarkerSize",12)
+    plot(time(i)+t_traj,u_traj,'.-r',"MarkerSize",12)
     plot([min(time) max(time)],[0 0],'--r')    
     hold off
     % axis([0-.1 .5+.1 -0.21 .21])

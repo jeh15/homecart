@@ -27,9 +27,9 @@ Jz  = .5*m*R^2;    % Moment of inertia [kg.m2]
 g   = 9.81;        % Gravity [m/s2]
 K = m*g / (m+(Jz/R^2));
 
-Bd = [ 0 ;
-       0 ;
-       K ];
+Bd = [0;
+      0;
+      K];
 
 %% Setup the Problem Objectives and Constraints
 Time = 0; i = 1;

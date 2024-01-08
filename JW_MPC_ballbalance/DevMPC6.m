@@ -27,9 +27,10 @@ dims_v = size(vd_lb,1);
 
 % Q = zeros(dims_x*3);
 % Q(1:dims_x,1:dims_x) = eye(dims_x)
-Q = [1 0 0 ;
-     0 .1 0 ;
-     0 0 .01];
+% last 2000
+Q = .01*[10 0     0 ;
+         0 .0001 0 ;
+         0 0     .0001];
 R = eye(dims_v).*0.000001;
 
 % Drone Properites
