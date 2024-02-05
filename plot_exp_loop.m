@@ -1,18 +1,21 @@
 clc;clear;close all;
 
-M = readmatrix("data/data_movel_2d_2024_01_08-05_45_47_PM.csv");
+M = readmatrix("data/ballbaordmodel_2024_02_02-07_07_55_PM.csv");
 
 
 time = M(1,:);
 ball_pos = M(2,:);
 ball_vel = M(3,:);
 ball_acc = M(4,:);
-target_vel = M(5,:);
+ball_jerk = M(5,:);
+target_vel = M(6,:);
 
+
+delay = 0.0000001;
 
 %%
 
-pt = -0.5189370547353503;
+pt = -0.007211071529174705;
 target = pt*ones(size(time));
 
 subplot(4,1,1)
@@ -34,13 +37,13 @@ xlabel("Time (s)")
 ylabel("Acceleration (m/s^2)")
 
 subplot(4,1,4)
-plot(time,target_vel,time,zeros(size(time)))
+plot(time,ball_jerk,time,zeros(size(time)))
 title("Target Velocity")
 xlabel("Time (s)")
 ylabel(" target Velocity (m/s)")
 
 %% MPC
-addpath(genpath([pwd '/Functions']))
+addpath(genpath([pwd '/JW_MPC_ball_board_model/Functions']))
 [Th,Nodes,xd_lb,xd_ub] = DevMPC6();
 qd_des = [pt,0,0]';
 
@@ -48,7 +51,7 @@ qd_des = [pt,0,0]';
 
 xl = [time(1),time(end)+0.5];
 
-ylp = [-1 -.1]; 
+ylp = [-.3 .3]; 
 % ylp = [-10 100]; 
 ylv = [min(ball_vel)-1 max(ball_vel)+1]; 
 
@@ -70,7 +73,7 @@ for i=1:size(time,2)
     % subplot(1,2,1)
 
     % generate x traj
-    x0 = [ball_pos(i), ball_vel(i), ball_acc(i)]';
+    x0 = [ball_pos(i), ball_vel(i), ball_acc(i), ball_jerk(i)]';
     [x_traj, u_traj] = RunMPC6(Th,Nodes,x0,qd_des,xd_lb,xd_ub);   
 
     plot(time(1:i),ball_pos(1:i),'.-b',"MarkerSize",12)
@@ -127,5 +130,5 @@ for i=1:size(time,2)
     ax.FontSize = 16;
 
     set(gcf, 'Position', get(0, 'Screensize'));
-    pause(.1)
+    pause(delay)
 end

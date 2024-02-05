@@ -165,7 +165,7 @@ iteration = 0
 # setting joint limit
 joint_angles = rtde_r.getActualQ()
 joint_angles = [i *180.0/math.pi for i in joint_angles]
-angle_range = [70,100]
+angle_range = [73,113]
 
 robot_pose = rtde_r.getActualTCPPose()
 
@@ -184,7 +184,7 @@ ball_range = [-7,-3]
 fix_ur5_acc = 2.0
 fix_ur5_vel = 0.5
 
-maxvel = 2.0
+maxvel = 4.0
 
 try:
     while ((time.time() - initial_time) < test_duration) and (int(joint_angles[4]) in range(angle_range[0],angle_range[1]) ):
@@ -192,6 +192,7 @@ try:
         # print time now
         time_now = time.time() - initial_time
         print("Time: ", time_now)
+        print("j4: ", joint_angles[4])
 
         # Get ball state
         frames = pipeline.wait_for_frames()
@@ -235,7 +236,7 @@ try:
         qd_des = matlab.double([[xt], [0.0], [0.0]])
         [qd,ud] = eng.RunMPC6(Th,Nodes,qd_i,qd_des,xd_lb,xd_ub,nargout=2)
         # vt = -ud[0][1]
-        vt = -ud[0][0]
+        vt = ud[0][0]
 
         vt_clip = np.clip(vt, -maxvel, maxvel)
 

@@ -16,6 +16,10 @@ Nodes = 10;
 xd_lb = [-2];
 xd_ub = [2];  
 
+% xd_lb = [-0.4];
+% xd_ub = [0.4];  
+
+
 % Velocity Upper/Lower Bounds - [x; y; z], [max, min]
 vd_lb = [-1.75];
 vd_ub = [1.75];
@@ -28,9 +32,21 @@ dims_v = size(vd_lb,1);
 % Q = zeros(dims_x*3);
 % Q(1:dims_x,1:dims_x) = eye(dims_x)
 % last 2000
-Q = .01*[10 0     0 ;
-         0 .0001 0 ;
-         0 0     .0001];
+% Q = .01*[1 0     0 ;
+%          0 .0001 0 ;
+%          0 0     .0001];
+
+% % Q = 1*[0.5 0 0;
+% %        0 1 0;
+% %        0 0 0.1];
+
+% Q = 1*[0.1 0 0;
+%        0 10000 0;
+%        0 0 10];
+Q = 1*[1 0 0;
+       0 1 0;
+       0 0 1];
+
 R = eye(dims_v).*0.000001;
 
 % Drone Properites
@@ -46,9 +62,21 @@ Ad = [0 1 0;
       0 0 0];
 
 % Ball properties
-m   = 0.003;       % Mass [kg]
-rr   = 0.017;       % Radius [m]
-Jz  = .5*m*rr^2;    % Moment of inertia [kg.m2]
+
+golf = 0;
+if golf ==1
+    % m   = 0.003;       % Mass [kg]
+    m   = 0.046;       % Mass [kg]
+    rr   = 0.021;       % Radius [m]
+    % Jz  = .5*m*rr^2;    % Moment of inertia [kg.m2]
+    Jz  = (2/5)*m*rr^2;    % Moment of inertia [kg.m2]
+else
+    m   = 0.003;       % Mass [kg]
+    % m   = 0.046;       % Mass [kg]
+    rr   = 0.02;       % Radius [m]
+    % Jz  = .5*m*rr^2;    % Moment of inertia [kg.m2]
+    Jz  = (2/3)*m*rr^2;    % Moment of inertia [kg.m2]
+end
 g   = 9.81;        % Gravity [m/s2]
 K = m*g / (m+(Jz/rr^2));
 

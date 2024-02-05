@@ -47,6 +47,8 @@ function [x,u,dv] = Constraints(Th,Nodes,Ad,Bd,xd_lb,xd_ub,vd_lb,vd_ub)
      % Velocity Bound equalities
      ciq_v_lb = -x(Dims+1:2,:) + vd_lb;
      ciq_v_ub = x(Dims+1:2,:) - vd_ub;
+
+     
      
      % Linearized Ball Constraint - Based on initial state
      % ciq_ball = AvoidanceConstraint(x_ic, x, x_prev, xo_ic, r1, Th, Ts, Nodes);
