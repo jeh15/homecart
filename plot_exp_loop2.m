@@ -1,6 +1,6 @@
 clc;clear;close all;
 
-M = readmatrix("data/ballbaordmodel_2024_02_05-01_48_42_PM.csv");
+M = readmatrix("data/ballbaordmodel_2024_02_05-08_27_32_PM.csv");
 
 
 time = M(1,:);
@@ -15,7 +15,7 @@ delay = 0.0000001;
 
 %%
 
-pt = -0.005391592922552503;
+pt = -0.0076401551241990825;
 target = pt*ones(size(time));
 
 subplot(4,1,1)
@@ -44,6 +44,7 @@ ylabel(" target Velocity (m/s)")
 
 %% MPC
 addpath(genpath([pwd '/JW_MPC_ball_board_model/Functions']))
+addpath(genpath([pwd '/JW_MPC_ball_board_model']))
 [Th,Nodes,xd_lb,xd_ub] = DevMPC6();
 qd_des = [pt,0,0]';
 

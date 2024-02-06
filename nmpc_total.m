@@ -14,71 +14,71 @@ function out = nmpc_total(x1,x2,x3,x4)
 %==========================================================================    
     Tfinal = 1.0*10;         % Tfinal for simulation
     N      = 11;             % Number of nodes (horizon)
-    Th     = 0.5;            % MPC Time horizon
-    Tc     = 0.1;            % Control Time horizon
-
-    % xmeasure = [xx 0.0 0.0 0.0];     % initial [x dx ddx dddx] (last ur5e link)
-
-    xmeasure = [x1 x2 x3 0];     % initial [x dx ddx dddx] (last ur5e link)
-
-    tmeasure = 0.0;        % initial time (do not change)
-
-    % control input settings
-    u0   = 0.01*ones(1,N);  % initial input guess
-    ulim = 0.2;
-
-    % task state constraint - set state limits
-    sig = 20*.1*.1*0.08;             % sigma of Gaussian distribution -> covariance matrix with sigma^2 (here: uncertainty considered)
-    beta = 0.8;            % smpc risk parameter, [0.5 to 0.999] (here: high beta means low risk)
-    targ = 2.1; del = 0.1; % ideal 2.1
-    x1_limit = [targ-del,targ+del];         % limit for x1 - (chance) constraint -> final velocity
-    state = 2;        % 1,2,3,4 - position,velocity,acceleration,jerk
-
-%==========================================================================
-
-
-
-%==========================================================================    
-% optimization options
-%==========================================================================    
-    tol_opt       = 1e-8; % 8
-    opt_option    = 0;
-    iprint        = 10;             % see nmpc.m line 81+
-    type          = 'difference equation';
-    atol_ode_real = 1e-12;
-    rtol_ode_real = 1e-12;
-    atol_ode_sim  = 1e-4;
-    rtol_ode_sim  = 1e-4;
-%==========================================================================        
+        Th     = 0.5;            % MPC Time horizon
+        Tc     = 0.1;            % Control Time horizon
+    
+        % xmeasure = [xx 0.0 0.0 0.0];     % initial [x dx ddx dddx] (last ur5e link)
+    
+        xmeasure = [x1 x2 x3 0];     % initial [x dx ddx dddx] (last ur5e link)
+    
+        tmeasure = 0.0;        % initial time (do not change)
+    
+        % control input settings
+        u0   = 0.01*ones(1,N);  % initial input guess
+        ulim = 0.2;
+    
+        % task state constraint - set state limits
+        sig = 20*.1*.1*0.08;             % sigma of Gaussian distribution -> covariance matrix with sigma^2 (here: uncertainty considered)
+        beta = 0.8;            % smpc risk parameter, [0.5 to 0.999] (here: high beta means low risk)
+        targ = 2.1; del = 0.1; % ideal 2.1
+        x1_limit = [targ-del,targ+del];         % limit for x1 - (chance) constraint -> final velocity
+        state = 2;        % 1,2,3,4 - position,velocity,acceleration,jerk
+    
+    %==========================================================================
+    
+    
+    
+    %==========================================================================    
+    % optimization options
+    %==========================================================================    
+        tol_opt       = 1e-8; % 8
+        opt_option    = 0;
+        iprint        = 10;             % see nmpc.m line 81+
+        type          = 'difference equation';
+        atol_ode_real = 1e-12;
+        rtol_ode_real = 1e-12;
+        atol_ode_sim  = 1e-4;
+        rtol_ode_sim  = 1e-4;
+    %==========================================================================        
+            
+    
+    %==========================================================================    
+    % System Parameters
+    %==========================================================================    
         
-
-%==========================================================================    
-% System Parameters
-%==========================================================================    
-    
-    % q - [x dx ddx dddx] - { x - distance along pan(inclined plane) }
-    
-    Ac = [0  1  0  0;...
-          0  0  1  0;...
-          0  0  0  1;...
-          0  0  0  0;];
-    
-    m   = 0.003;            % Mass              [kg]
-    R   = 0.02;
-    Jz  = .5*m*R^2;    % Moment of inertia [kg.m2]
-    g   = 9.81;             % Gravity           [m/s2]
-    
-    K = m*g / (m+Jz/R^2);
+        % q - [x dx ddx dddx] - { x - distance along pan(inclined plane) }
         
-    Bc = [0;
-          0;
-          0;
-          K];
-    
-    Cc = [1 0 0 0];
-    Dc = 0;
-    
-    [sysd,G] = c2d(ss(Ac,Bc,Cc,Dc),Th,'zoh');
+        Ac = [0  1  0  0;...
+              0  0  1  0;...
+              0  0  0  1;...
+              0  0  0  0;];
+        
+        m   = 0.003;            % Mass              [kg]
+        R   = 0.02;
+        Jz  = .5*m*R^2;    % Moment of inertia [kg.m2]
+        g   = 9.81;             % Gravity           [m/s2]
+        
+        K = m*g / (m+Jz/R^2);
+            
+        Bc = [0;
+              0;
+              0;
+              K];
+        
+        Cc = [1 0 0 0];
+        Dc = 0;
+        
+        [sysd,G] = c2d(ss(Ac,Bc,Cc,Dc),Th,'zoh');
     
     sysA = sysd.A;
     sysB = sysd.B;

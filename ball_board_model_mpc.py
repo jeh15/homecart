@@ -195,7 +195,7 @@ initial_pos = copy.deepcopy(robot_pose[4])
 last_board_time = time.time()
 
 # Fixed acceleration
-fix_ur5_acc = 5.0
+fix_ur5_acc = 2.0
 maxvel = 10.0 # previously 10.0
 test_duration = 6.0
 iteration = 0
