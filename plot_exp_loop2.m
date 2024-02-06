@@ -1,6 +1,6 @@
 clc;clear;close all;
 
-M = readmatrix("data/ballbaordmodel_2024_02_05-08_27_32_PM.csv");
+M = readmatrix("data/ballbaordmodel_2024_02_06-01_53_11_PM.csv");
 
 
 time = M(1,:);
@@ -15,7 +15,7 @@ delay = 0.0000001;
 
 %%
 
-pt = -0.0076401551241990825;
+pt = -0.006112374958904234;
 target = pt*ones(size(time));
 
 subplot(4,1,1)

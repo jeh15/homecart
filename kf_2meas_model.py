@@ -33,6 +33,8 @@ fvel = np.array([])
 
 fpos2 = np.array([])
 fvel2 = np.array([])
+fbpos2 = np.array([])
+fbvel2 = np.array([])
 
 
 
@@ -52,7 +54,7 @@ my_filter.B = np.array([[0.],           #
                         [5.886]])      # state transition matrix
 my_filter.H = np.array([[1.,0.]])     # Measurement function
 my_filter.P *= 0.0                   # covariance matrix
-my_filter.R = 0.00000000005             # state uncertainty
+my_filter.R = 0.0000005             # state uncertainty
 my_filter.Q = Q_discrete_white_noise(dim=2, dt=0.1/3., var=0.01) # process uncertainty
 #--------------------------------------------------------------------------
 
@@ -60,17 +62,22 @@ my_filter.Q = Q_discrete_white_noise(dim=2, dt=0.1/3., var=0.01) # process uncer
 
 #--------------------------------------------------------------------------
 # Now, create the filter
-my_filter2 = KalmanFilter(dim_x=2, dim_z=1)
+my_filter2 = KalmanFilter(dim_x=4, dim_z=2)
 # Initialize the filter's matrices.
-my_filter2.x = np.array([[acc[0]],[jerk[0]]])       # initial state (location and velocity)
-my_filter2.F = np.array([[1., .1/3.],
-                        [0.,    1.]])    # state transition matrix
-my_filter2.B = np.array([[0.],           #
-                        [5.886]])      # state transition matrix
-my_filter2.H = np.array([[1.,0.]])     # Measurement function
-my_filter2.P *= 0.0                   # covariance matrix
-my_filter2.R = 0.0000000005             # state uncertainty
-my_filter2.Q = Q_discrete_white_noise(dim=2, dt=0.1/3., var=0.01) # process uncertainty
+my_filter2.x = np.array([[pos[0]],[vel[0]],[acc[0]],[jerk[0]]])       # initial state (location and velocity)
+my_filter2.F = np.array([[1.,      0.033,   0.003205,   1.27e-05],
+                         [0.,          1.,     0.1942,  0.0008882],
+                         [0.,          0.,          1.,   0.005467],
+                         [0.,          0.,          0.,   0.002426]])    # state transition matrix
+my_filter2.B = np.array([[2.11e-05],
+                        [0.002167],
+                        [0.02576],
+                        [0.9332]])    # state transition matrix
+my_filter2.H = np.array([[1.,0.,0.,0.],
+                         [0.,0.,1.,0.]])    # Measurement function
+my_filter2.P *= 0.01                 # covariance matrix
+my_filter2.R = 0.00001                      # state uncertainty
+my_filter2.Q = Q_discrete_white_noise(dim=4, dt=0.1/3., var=0.1) # process uncertainty
 #--------------------------------------------------------------------------
 
 
@@ -91,12 +98,16 @@ while i<final:
     fvel = np.append(fvel,x[1])
 
     my_filter2.predict()
-    my_filter2.update(acc[i])
+    my_filter2.update(np.array([[pos[i]],[acc[i]]]))
 
     x2 = my_filter2.x
     # print('x2: ', x2)
-    fpos2 = np.append(fpos2,x2[0])
-    fvel2 = np.append(fvel2,x2[1])
+    # print size(x2)
+    # print('xp: ', x2[0][0])
+    fpos2 = np.append(fpos2,x2[0][0])
+    fvel2 = np.append(fvel2,x2[1][0])
+    fbpos2 = np.append(fbpos2,x2[2][0])
+    fbvel2 = np.append(fbvel2,x2[3][0])
 
 
     # if i>2:
@@ -109,14 +120,19 @@ while i<final:
     i = i + 1
 
 
+# print('size(fpos): ', np.size(fpos))
+# print('size(fpos2): ', np.size(fpos2))
+
 plt.plot(time[0:i], pos[0:i], time[0:i], fpos[0:i], time[0:i], fpos2[0:i])
-plt.legend(['real','kf1000'])
+plt.legend(['real','kf1','kf2'])
 plt.show()
 
-plt.plot(time[0:i], vel[0:i], time[0:i], fvel[0:i], time[0:i], fvel2[0:i])
-plt.legend(['real','kf1000','last3mean'])
-plt.show()
 
-plt.plot(time[0:i], jerk[0:i], time[0:i], fvel2[0:i])
-plt.legend(['real','kf'])
-plt.show()
+
+# plt.plot(time[0:i], vel[0:i], time[0:i], fvel[0:i], time[0:i], fvel2[0:i])
+# plt.legend(['real','kf1','kf2'])
+# plt.show()
+
+# plt.plot(time[0:i], jerk[0:i], time[0:i], fbvel2[0:i])
+# plt.legend(['real','kf'])
+# plt.show()
