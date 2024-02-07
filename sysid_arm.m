@@ -8,15 +8,15 @@ a = ['0_5','0_75','1_0','1_25','1_5','2_0','3_0','4_0','5_0'];
 
 % open each csv, create new variable, and save matrix in variable
 
-a1 = readmatrix('arm_sysid_data_0_5.csv');
-a2 = readmatrix('arm_sysid_data_0_75.csv');
-a3 = readmatrix('arm_sysid_data_1_0.csv');
-a4 = readmatrix('arm_sysid_data_1_25.csv');
-a5 = readmatrix('arm_sysid_data_1_5.csv');
-a6 = readmatrix('arm_sysid_data_2_0.csv');
-a7 = readmatrix('arm_sysid_data_3_0.csv');
-a8 = readmatrix('arm_sysid_data_4_0.csv');
-a9 = readmatrix('arm_sysid_data_5_0.csv');
+a1 = readmatrix('./sysiddata/arm_sysid_data_0_5.csv');
+a2 = readmatrix('./sysiddata/arm_sysid_data_0_75.csv');
+a3 = readmatrix('./sysiddata/arm_sysid_data_1_0.csv');
+a4 = readmatrix('./sysiddata/arm_sysid_data_1_25.csv');
+a5 = readmatrix('./sysiddata/arm_sysid_data_1_5.csv');
+a6 = readmatrix('./sysiddata/arm_sysid_data_2_0.csv');
+a7 = readmatrix('./sysiddata/arm_sysid_data_3_0.csv');
+a8 = readmatrix('./sysiddata/arm_sysid_data_4_0.csv');
+a9 = readmatrix('./sysiddata/arm_sysid_data_5_0.csv');
 
 
 
@@ -53,63 +53,63 @@ plot(a9(1,:),a9(2,:))
 t1 = a1(1,:);
 v1 = a1(2,:);
 c1 = a1(3,:);
-[v1,v1la] = rmooutliers(v1);
+[v1,v1la] = rmoutliers(v1);
 t1(v1la==1) = [];
 c1(v1la==1) = [];
 
 t2 = a2(1,:);
 v2 = a2(2,:);
 c2 = a2(3,:);
-[v2,v2la] = rmooutliers(v2);
+[v2,v2la] = rmoutliers(v2);
 t2(v2la==1) = [];
 c2(v2la==1) = [];
 
 t3 = a3(1,:);
 v3 = a3(2,:);
 c3 = a3(3,:);
-[v3,v3la] = rmooutliers(v3);
+[v3,v3la] = rmoutliers(v3);
 t3(v3la==1) = [];
 c3(v3la==1) = [];
 
 t4 = a4(1,:);
 v4 = a4(2,:);
 c4 = a4(3,:);
-[v4,v4la] = rmooutliers(v4);
+[v4,v4la] = rmoutliers(v4);
 t4(v4la==1) = [];
 c4(v4la==1) = [];
 
 t5 = a5(1,:);
 v5 = a5(2,:);
 c5 = a5(3,:);
-[v5,v5la] = rmooutliers(v5);
+[v5,v5la] = rmoutliers(v5);
 t5(v5la==1) = [];
 c5(v5la==1) = [];
 
 t6 = a6(1,:);
 v6 = a6(2,:);
 c6 = a6(3,:);
-[v6,v6la] = rmooutliers(v6);
+[v6,v6la] = rmoutliers(v6);
 t6(v6la==1) = [];
 c6(v6la==1) = [];
 
 t7 = a7(1,:);
 v7 = a7(2,:);
 c7 = a7(3,:);
-[v7,v7la] = rmooutliers(v7);
+[v7,v7la] = rmoutliers(v7);
 t7(v7la==1) = [];
 c7(v7la==1) = [];
 
 t8 = a8(1,:);
 v8 = a8(2,:);
 c8 = a8(3,:);
-[v8,v8la] = rmooutliers(v8);
+[v8,v8la] = rmoutliers(v8);
 t8(v8la==1) = [];
 c8(v8la==1) = [];
 
 t9 = a9(1,:);
 v9 = a9(2,:);
 c9 = a9(3,:);
-[v9,v9la] = rmooutliers(v9);
+[v9,v9la] = rmoutliers(v9);
 t9(v9la==1) = [];
 c9(v9la==1) = [];
 

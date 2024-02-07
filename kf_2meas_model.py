@@ -51,7 +51,7 @@ my_filter.x = np.array([[pos[0]],[vel[0]]])       # initial state (location and 
 my_filter.F = np.array([[1., .1/3.],
                         [0.,    1.]])    # state transition matrix
 my_filter.B = np.array([[0.],           #
-                        [5.886]])      # state transition matrix
+                        [1000]])      # state transition matrix
 my_filter.H = np.array([[1.,0.]])     # Measurement function
 my_filter.P *= 0.0                   # covariance matrix
 my_filter.R = 0.0000005             # state uncertainty

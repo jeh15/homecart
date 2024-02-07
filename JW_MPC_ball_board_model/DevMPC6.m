@@ -42,8 +42,8 @@ dims_v = size(vd_lb,1);
 
 Q = 0.2*[2 0   0 0;
          0 0.2 0 0;
-         0 0   0 0;
-         0 0   0 0];
+         0 0   0.000001 0;
+         0 0   0 0.000001];
 
 
 R = eye(dims_v).*0.000001;
@@ -93,14 +93,14 @@ K = m*g / (m+(Jz/rr^2));
 Ad = [0 1 0 0;
       0 0 K 0;
       0 0 0 1;
-      0 0 0 -31];
+      0 0 0 -15]; % originally -31 newish -17
 
 
 
 Bd = [ 0 ;
        0 ;
        0 ;
-       29 ];
+       10 ]; % originally 29 newish 16
 
 
 %% Setup the Problem Objectives and Constraints

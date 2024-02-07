@@ -170,12 +170,16 @@ figure(2)
 % xlim([1,100])
 % title('1')
 % figure(3)
-bode(tf(29.08,[1 31.84]))
+% good .55 , 0
+bode(tf(10,[1 15]),w,'.-b')
+hold on
+bode(tf(29.08,[1 31.84]),w,'.-r')
 title('fitted model')
+legend('new','old')
 xlim([1,100])
-
+grid on
 %%
 
-tfa = tf(29.08,[1 31.84]);
-ss(tfa)
+% tfa = tf(0.1*29.08,[1 31.84]);
+% ss(tfa)
 
