@@ -33,7 +33,7 @@ def ball_state(frames, last_pos, last_vel, last_acc, last_time, depth_scale, str
         cv2.rectangle(depth_image, (x, y), (x + w, y + h), (0, 255, 0), 2)
     else:
         print("Object not detected")
-    cv2.putText(resized_color_image, f"time : {time_now:.4f} s", (80,80), cv2.FONT_HERSHEY_COMPLEX,0.5, (0,0,0), 1)        
+    cv2.putText(resized_color_image, f"time : {time_now:.4f} s", (256,256), cv2.FONT_HERSHEY_COMPLEX,0.5, (0,0,0), 1)        
     out.write(resized_color_image)
     depth = depth_image[math.ceil(y+w/2),math.ceil(x+w/2)].astype(float)
     dist = depth * depth_scale

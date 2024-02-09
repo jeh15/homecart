@@ -1,4 +1,4 @@
-function [x,u,dv] = Constraints(Th,Nodes,Ad,Bd,xd_lb,xd_ub,vd_lb,vd_ub)
+function [x,u,dv] = Constraints(Th,Nodes,Ad,Bd,xd_lb,xd_ub,vd_lb,vd_ub,du_max)
     %% Develop the Nonlinear Constraints
     % Dermine the Lengths of the Input Matricies & Nodes
      A_len = size(Ad,2);
@@ -48,6 +48,10 @@ function [x,u,dv] = Constraints(Th,Nodes,Ad,Bd,xd_lb,xd_ub,vd_lb,vd_ub)
      ciq_v_lb = -x(Dims+1:2,:) + vd_lb;
      ciq_v_ub = x(Dims+1:2,:) - vd_ub;
 
+     % control input delta-node max
+     ciq_u_lb = -(u(2:end) - u(1:end-1)) - du_max;
+     ciq_u_ub = (u(2:end) - u(1:end-1)) - du_max;
+     
      
      
      % Linearized Ball Constraint - Based on initial state
@@ -60,7 +64,7 @@ function [x,u,dv] = Constraints(Th,Nodes,Ad,Bd,xd_lb,xd_ub,vd_lb,vd_ub)
      % ciq_cost = p.*(ciq_ball + (r2 - r1)) - s;     
 
      % Combine the Inequality Constraints
-     ciq = [ciq_x_lb(:); ciq_x_ub(:); ciq_v_lb(:); ciq_v_ub(:)];
+     ciq = [ciq_x_lb(:); ciq_x_ub(:); ciq_v_lb(:); ciq_v_ub(:); ciq_u_lb(:); ciq_u_ub(:)];
      
      % Seperate out the A and b
      Aiq = jacobian(ciq,dv);

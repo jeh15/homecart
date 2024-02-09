@@ -93,19 +93,23 @@ K = m*g / (m+(Jz/rr^2));
 Ad = [0 1 0 0;
       0 0 K 0;
       0 0 0 1;
-      0 0 0 -15]; % originally -31 newish -17
+      0 0 0 -15]; % originally -31 newish -17 BETTER = -15
 
 
 
 Bd = [ 0 ;
        0 ;
        0 ;
-       10 ]; % originally 29 newish 16
+       10 ]; % originally 29 newish 16 BETTER = 10 
+
+
+% u - board ang vel step -> equivalent to board-ang-acc = max-step / dt = 0.5/(0.033)
+du_max = 0.25; % original 0.5, updated 0.25 
 
 
 %% Setup the Problem Objectives and Constraints
 % Develop the Constraint Functions
-[x,u,dv] = Constraints(Th,Nodes,Ad,Bd,xd_lb,xd_ub,vd_lb,vd_ub);
+[x,u,dv] = Constraints(Th,Nodes,Ad,Bd,xd_lb,xd_ub,vd_lb,vd_ub,du_max);
 
 % Develop the Objective Functions
 ObjFunc(Q,R,x,u,dv);

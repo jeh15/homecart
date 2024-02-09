@@ -1,6 +1,6 @@
 clc;clear;close all;
 
-M = readmatrix("data/ballbaordmodel_2024_02_07-02_04_18_PM.csv");
+M = readmatrix("data/ballbaordmodel_2024_02_07-05_47_45_PM.csv");
 
 
 time = M(1,:);
@@ -13,9 +13,21 @@ target_vel = M(6,:);
 
 delay = 0.0000001;
 
+
 %%
 
-pt = -0.007933724597361231;
+pics = {};
+numFrames = 132;
+prefix = '/home/orl/Downloads/vid2pix/t2/frame';
+for i=0:numFrames    
+    filename = strcat(prefix,num2str(i),'.jpg');
+    pics{i+1} = imread(filename);
+end
+
+
+%%
+
+pt = -0.006458956537328;
 target = pt*ones(size(time));
 
 subplot(4,1,1)
@@ -70,6 +82,16 @@ ylbv = [-2 2];
 
 
 t_traj = 0:Th/(Nodes-1):Th;
+
+figure
+set(gcf, 'Position', get(0, 'Screensize'));
+
+pause(.1)
+
+writerObj = VideoWriter('out2.avi'); % Name it.
+writerObj.FrameRate = 30; % How many frames per second.
+open(writerObj);
+
 
 for i=1:size(time,2)
 % ===== ball pos ====    
@@ -162,7 +184,7 @@ for i=1:size(time,2)
     ax.FontSize = 16;
 
 
-    subplot(4,2,[2 4 6 8])
+    subplot(4,2,[2 4])
     % subplot(1,2,2)
     plot(time(1:i),target_vel(1:i),'.-b',"MarkerSize",12)
     hold on
@@ -179,6 +201,17 @@ for i=1:size(time,2)
     ax = gca;
     ax.FontSize = 16;
 
+    subplot(4,2,[6 8])
+    imshow(pics{i})
+
+
     set(gcf, 'Position', get(0, 'Screensize'));
+
+
+    frame = getframe(gcf); % 'gcf' can handle if you zoom in to take a movie.
+    writeVideo(writerObj, frame);    
+    
+
     pause(delay)
 end
+close(writerObj);
