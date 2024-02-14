@@ -197,7 +197,7 @@ last_board_time = time.time()
 # Fixed acceleration
 fix_ur5_acc = 3.5
 maxvel = 10.0 # previously 10.0
-test_duration = 6.0
+test_duration = 15.0
 iteration = 0
 # -----------------------------------------------------------
 
@@ -206,8 +206,8 @@ try:
 
         # print time now
         time_now = time.time() - initial_time
-        print("Time: ", time_now)
-        print("j4: ", joint_angles[4])
+        # print("Time: ", time_now)
+        # print("j4: ", joint_angles[4])
 
         # Get ball state
         frames = pipeline.wait_for_frames()

@@ -6,10 +6,10 @@ addpath(genpath([pwd '/MPC6/Functions']))
 
 %% Input Parameters
 % Time Variables
-Th = 0.33;          % Time Horizon (lookahead time)
+Th = 1*0.33;          % Time Horizon (lookahead time)
 
 % Problem Nodes
-Nodes = 10;
+Nodes = 1*10;
 
 
 % Position Upper/Lower Bounds - [x; y; z], [max, min]
@@ -41,7 +41,7 @@ dims_v = size(vd_lb,1);
 % %        0 0 0.1];
 
 Q = 0.2*[2 0   0 0;
-         0 0.2 0 0;
+         0 5*0.2 0 0;
          0 0   0.000001 0;
          0 0   0 0.000001];
 
@@ -105,7 +105,7 @@ Bd = [ 0 ;
 
 % u - board ang vel step -> equivalent to board-ang-acc = max-step / dt = 0.5/(0.033)
 du_max = 0.25; % original 0.5, updated 0.25 
-
+% du_max = 0.3;
 
 %% Setup the Problem Objectives and Constraints
 % Develop the Constraint Functions

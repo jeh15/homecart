@@ -1,6 +1,6 @@
 clc;clear;close all;
 
-M = readmatrix("data/ballbaordmodel_2024_02_07-05_47_45_PM.csv");
+M = readmatrix("data/ballbaordmodel_2024_02_13-03_08_43_PM.csv");
 
 
 time = M(1,:);
@@ -17,8 +17,8 @@ delay = 0.0000001;
 %%
 
 pics = {};
-numFrames = 132;
-prefix = '/home/orl/Downloads/vid2pix/t2/frame';
+numFrames = 409-1;
+prefix = '/home/orl/Downloads/vid2pix/t13/frame';
 for i=0:numFrames    
     filename = strcat(prefix,num2str(i),'.jpg');
     pics{i+1} = imread(filename);
@@ -27,7 +27,7 @@ end
 
 %%
 
-pt = -0.006458956537328;
+pt = 0.004015977419724649;
 target = pt*ones(size(time));
 
 subplot(4,1,1)
@@ -88,7 +88,7 @@ set(gcf, 'Position', get(0, 'Screensize'));
 
 pause(.1)
 
-writerObj = VideoWriter('out2.avi'); % Name it.
+writerObj = VideoWriter('out_02_13_2024_1510.avi'); % Name it.
 writerObj.FrameRate = 30; % How many frames per second.
 open(writerObj);
 
