@@ -1,24 +1,23 @@
 clc;clear;close all;
 
-M = readmatrix("data/ballbaordmodel_2024_02_13-03_08_43_PM.csv");
+M = readmatrix("data/ballbaordmodel_2024_02_15-05_05_38_PM.csv");
+videoname = '/home/orl/Downloads/homecart_misc/videos/out_02_15_2024_1706.avi';
+numFrames = 330-1;
+prefix = '/home/orl/Downloads/vid2pix/t17/frame';
+pt = -0.004215782094729792;
 
-
+%%
 time = M(1,:);
 ball_pos = M(2,:);
 ball_vel = M(3,:);
 ball_acc = M(4,:);
 ball_jerk = M(5,:);
 target_vel = M(6,:);
-
-
 delay = 0.0000001;
-
 
 %%
 
 pics = {};
-numFrames = 409-1;
-prefix = '/home/orl/Downloads/vid2pix/t13/frame';
 for i=0:numFrames    
     filename = strcat(prefix,num2str(i),'.jpg');
     pics{i+1} = imread(filename);
@@ -27,7 +26,6 @@ end
 
 %%
 
-pt = 0.004015977419724649;
 target = pt*ones(size(time));
 
 subplot(4,1,1)
@@ -88,7 +86,7 @@ set(gcf, 'Position', get(0, 'Screensize'));
 
 pause(.1)
 
-writerObj = VideoWriter('out_02_13_2024_1510.avi'); % Name it.
+writerObj = VideoWriter(videoname); % Name it.
 writerObj.FrameRate = 30; % How many frames per second.
 open(writerObj);
 
