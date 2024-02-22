@@ -74,12 +74,12 @@ def ball_state(frames, last_pos, last_time, depth_scale, stream_flag):
     if bbox is not None:
         x, y, w, h = bbox
         cv2.rectangle(resized_color_image, (x, y), (x + w, y + h), (0, 255, 0), 2)
-        cv2.rectangle(depth_image, (x, y), (x + w, y + h), (0, 255, 0), 2)
+        # cv2.rectangle(depth_image, (x, y), (x + w, y + h), (0, 255, 0), 2)
     else:
         print("Object not detected")
-    depth = depth_image[math.ceil(y+w/2),math.ceil(x+w/2)].astype(float)
+    depth = depth_image[math.ceil(y-h/2),math.ceil(x-w/2)].astype(float)
     dist = depth * depth_scale
-    pos_pixel = np.array([x+w/2, y+w/2, 1.])
+    pos_pixel = np.array([x+w/2, y+3*w, 1.])
     homography = np.array([[-1.40696769e-03,  2.49020831e-05,  6.19377061e-01],[-3.28710562e-05, -1.11940649e-03,  1.26719167e-01],[-7.94152690e-05,  8.58692544e-05,  1.00000000e+00]])
 
     # homography = np.array([[-1.91855468e-03,-5.64280788e-05,  1.78707726e-01],[-6.23853288e-06,  1.66568828e-03, -7.74825784e-03],[-2.41772053e-04,  3.13027163e-04,  1.00000000e+00]])
@@ -103,8 +103,15 @@ def ball_state(frames, last_pos, last_time, depth_scale, stream_flag):
     if stream_flag:
         # cv2.putText(resized_color_image, f"Vel: {vel[0]:.4f} {vel[1]:.4f} {vel[2]:.4f} m/s", (80,80), cv2.FONT_HERSHEY_COMPLEX,0.5, (0,0,0), 1)
         cv2.putText(resized_color_image, f"Pos: {pw:.2f}  m", (80,100), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0,0,0), 1)
+        cv2.putText(resized_color_image, f".", (80,100), cv2.FONT_HERSHEY_COMPLEX, 0.5, (255,255,255), 1)
         cv2.namedWindow('RealSense', cv2.WINDOW_AUTOSIZE)
         cv2.imshow('RealSense', resized_color_image)
+
+        cv2.namedWindow('RealSense2', cv2.WINDOW_AUTOSIZE)
+        cv2.putText(depth_image, f"depth: {dist:.2f}  m", (80,100), cv2.FONT_HERSHEY_COMPLEX, 0.5, (0,0,0), 1)
+        cv2.putText(depth_image, f".", (math.ceil(x+w/2),math.ceil(y+h/2)), cv2.FONT_HERSHEY_COMPLEX, 2.0, (255,255,255), 2)
+        cv2.imshow('RealSense2', depth_image)
+
         cv2.waitKey(1)
     return [pos, vel]
 

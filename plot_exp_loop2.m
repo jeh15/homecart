@@ -1,10 +1,10 @@
 clc;clear;close all;
 
-M = readmatrix("data/ballbaordmodel_2024_02_15-05_05_38_PM.csv");
-videoname = '/home/orl/Downloads/homecart_misc/videos/out_02_15_2024_1706.avi';
-numFrames = 330-1;
-prefix = '/home/orl/Downloads/vid2pix/t17/frame';
-pt = -0.004215782094729792;
+M = readmatrix("data/ballbaordmodel_2024_02_16-01_27_33_PM.csv");
+videoname = '/home/orl/Downloads/homecart_misc/videos/out_02_16_2024_1329.avi';
+numFrames = 790-1;
+prefix = '/home/orl/Downloads/vid2pix/t19/frame';
+pt = 0.003266882793718561;
 
 %%
 time = M(1,:);

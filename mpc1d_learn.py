@@ -158,6 +158,12 @@ targ_vel_data = np.array([])
 board_pos_data = np.array([])
 board_vel_data = np.array([])
 
+
+kf2_pos_data = np.array([0.0])
+kf2_vel_data = np.array([0.0])
+kf2_acc_data = np.array([0.0])
+
+
 last_pos = np.array([0.0, 0.0, 0.0])
 last_vel = np.array([0.0, 0.0, 0.0])
 last_acc = np.array([0.0, 0.0, 0.0])
@@ -197,7 +203,7 @@ last_board_time = time.time()
 # Fixed acceleration
 fix_ur5_acc = 3.5
 maxvel = 10.0 # previously 10.0
-test_duration = 30.0
+test_duration = 15.0
 iteration = 0
 # -----------------------------------------------------------
 
@@ -235,8 +241,22 @@ try:
             my_filter.R = 0.0000005             # state uncertainty
             my_filter.Q = Q_discrete_white_noise(dim=2, dt=0.1/3., var=0.01) # process uncertainty
             #--------------------------------------------------------------------------
-                
-            
+            my_filter2 = KalmanFilter(dim_x=3, dim_z=1)
+            # Initialize the filter's matrices.
+            my_filter2.x = np.array([[pos[0]],[vel[0]], [0.0]])       # initial state (location and velocity
+            my_filter2.F = np.array([[1., .1/3., 0.5*0.1/3.],
+                                    [0.,    1.,     0.1/3.],
+                                    [0.,    0.,         1.]])    # state transition matrix
+
+            my_filter2.B = np.array([[0.],           #
+                                    [0.],
+                                    [5.886]])      # state transition matrix
+            my_filter2.H = np.array([[1.,0.,0.]])     # Measurement function
+            my_filter2.P *= 0.0                   # covariance matrix
+            my_filter2.R = 0.0000005             # state uncertainty
+            my_filter2.Q = Q_discrete_white_noise(dim=3, dt=0.1/3., var=0.01) # process uncertainty
+            #--------------------------------------------------------------------------            
+
 
 
         ball_last_time = time.time()
@@ -259,6 +279,15 @@ try:
                 my_filter.predict()
                 my_filter.update(pos[0])
                 x2 = my_filter.x
+
+                my_filter2.predict()
+                my_filter2.update(pos[0])
+                x3 = my_filter2.x
+
+                kf2_pos_data = np.append(kf2_pos_data,x3[0])
+                kf2_vel_data = np.append(kf2_vel_data,x3[1])
+                kf2_acc_data = np.append(kf2_acc_data,x3[2])
+                
                 q = [x2[0][0], x2[1][0], board_pos - original_pose, board_vel]
             else:
                 q = [pos[0], vel[0], board_pos - original_pose, board_vel]
@@ -305,9 +334,9 @@ finally:
     rtde_c.stopScript()
 
 
-    data = np.vstack((time_data,  ball_pos_data, ball_vel_data, board_pos_data, board_vel_data, targ_vel_data))
+    data = np.vstack((time_data,  ball_pos_data, ball_vel_data, board_pos_data, board_vel_data, targ_vel_data, kf2_pos_data, kf2_vel_data, kf2_acc_data))
     timestamp = datetime.now().strftime("%Y_%m_%d-%I_%M_%S_%p")
-    filename = "./data/ballbaordmodel_" + timestamp + ".csv"
+    filename = "./data/mpc_1dlearn_" + timestamp + ".csv"
     np.savetxt(filename, data, delimiter=',')
     out.release()
     cv2.destroyAllWindows()

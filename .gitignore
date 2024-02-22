@@ -78,3 +78,19 @@ bazel-*
 .bazelversion
 # User-specific .bazelrc
 user.bazelrc
+
+
+# Windows default autosave extension
+*.asv
+
+
+# ignore videos
+*.mp4
+*.mov
+*.avi
+*.wmv
+*.webm
+*.mpg
+*.mpeg
+*.m2ts
+*.mts
