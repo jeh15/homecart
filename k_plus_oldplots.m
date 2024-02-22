@@ -1,20 +1,23 @@
 clc;clear;close all;
 
-M = readmatrix("data/ballbaordmodel_2024_02_16-01_27_33_PM.csv");
-videoname = '/home/orl/Downloads/homecart_misc/videos/out_02_16_2024_1329.avi';
-numFrames = 790-1;
-prefix = '/home/orl/Downloads/vid2pix/t19/frame';
+M = readmatrix("data/mpc_1dlearn_2024_02_22-06_09_37_PM.csv");
+videoname = '/home/orl/Downloads/homecart_misc/videos/out_02_22_2024_1834.avi';
+numFrames = 328-1;
+prefix = '/home/orl/Downloads/vid2pix/t22/frame';
 pt = -0.007799287459543922;
 
 %%
 time = M(1,:);
 ball_pos = M(2,:);
 ball_vel = M(3,:);
-ball_acc = M(4,:);
+board_pos = M(4,:);
 ball_jerk = M(5,:);
 target_vel = M(6,:);
 delay = 0.0000001;
-
+kf2_pos = M(7,:);
+kf2_vel = M(8,:);
+kf2_acc = M(9,:);
+kmodel = M(10,:);
 %%
 
 pics = {};
@@ -41,7 +44,7 @@ xlabel("Time (s)")
 ylabel("Velocity (m/s)")
 
 subplot(4,1,3)
-plot(time,ball_acc)
+plot(time,board_pos)
 title("Ball Acceleration")
 xlabel("Time (s)")
 ylabel("Acceleration (m/s^2)")
@@ -53,8 +56,8 @@ xlabel("Time (s)")
 ylabel(" target Velocity (m/s)")
 
 %% MPC
-addpath(genpath([pwd '/JW_MPC_ball_board_model/Functions']))
-addpath(genpath([pwd '/JW_MPC_ball_board_model']))
+addpath(genpath([pwd '/JW_MPC_bbm_learn/Functions']))
+addpath(genpath([pwd '/JW_MPC_bbm_learn']))
 [Th,Nodes,xd_lb,xd_ub] = DevMPC6();
 qd_des = [pt,0,0,0]';
 
@@ -97,8 +100,8 @@ for i=1:size(time,2)
     % subplot(1,2,1)
 
     % generate x traj
-    x0 = [ball_pos(i), ball_vel(i), ball_acc(i), ball_jerk(i)]';
-    [x_traj, u_traj] = RunMPC6(Th,Nodes,x0,qd_des,xd_lb,xd_ub);   
+    x0 = [ball_pos(i), ball_vel(i), board_pos(i), ball_jerk(i)]';
+    [x_traj, u_traj] = RunMPC6(Th,Nodes,x0,qd_des,xd_lb,xd_ub,kmodel(i));   
 
     plot(time(1:i),ball_pos(1:i),'.-b',"MarkerSize",12)
     hold on; plot([min(time) max(time)],[ball_pos(1) ball_pos(1)],'--r'); 
@@ -144,7 +147,7 @@ for i=1:size(time,2)
 
 
     subplot(4,2,5)
-    plot(time(1:i),ball_acc(1:i),'.-b',"MarkerSize",12)
+    plot(time(1:i),board_pos(1:i),'.-b',"MarkerSize",12)
     
     hold on    
     plot(time(i) + t_traj,x_traj(3,:)','.-r');
@@ -182,7 +185,7 @@ for i=1:size(time,2)
     ax.FontSize = 16;
 
 
-    subplot(4,2,[2 4])
+    subplot(4,2,2)
     % subplot(1,2,2)
     plot(time(1:i),target_vel(1:i),'.-b',"MarkerSize",12)
     hold on
@@ -198,6 +201,32 @@ for i=1:size(time,2)
 
     ax = gca;
     ax.FontSize = 16;
+
+
+
+    subplot(4,2,4)
+    if i>1
+        m=fit(board_pos(1:i)',kf2_acc(1:i)','poly1');
+        plot(board_pos(1:i),kf2_acc(1:i),'.r')
+        hold on 
+        plot(board_pos,m.p1*board_pos,'-b')
+    
+        % axis equal
+        
+        title('plot fitting',"FontSize",22)
+        ylabel('ball ddx (m/s)',"FontSize",16)
+        xlabel('board th (rad)',"FontSize",16)
+        ax = gca;
+        ax.FontSize = 16;
+        
+        text(.1,.4,num2str(m.p1))
+        axis([ -.06 .12 -.8 .6 ])
+        
+        hold off    
+    end
+
+
+
 
     subplot(4,2,[6 8])
     imshow(pics{i})

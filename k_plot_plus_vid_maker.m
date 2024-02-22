@@ -1,9 +1,9 @@
 clc;clear;close all;
 
-M = readmatrix("data/mpc_1dlearn_2024_02_21-11_33_40_AM.csv");
-videoname = '/home/orl/Downloads/homecart_misc/videos/kvid123.avi';
-numFrames = 331-1;
-prefix = '/home/orl/Downloads/vid2pix/t20/frame';
+M = readmatrix("data/mpc_1dlearn_2024_02_22-06_09_37_PM.csv");
+videoname = '/home/orl/Downloads/homecart_misc/videos/kvidfeb22_1814.avi';
+numFrames = 328-1;
+prefix = '/home/orl/Downloads/vid2pix/t22/frame';
 
 %%
 time = M(1,:);
@@ -87,7 +87,7 @@ for i=1:size(time,2)
         m=fit(board_pos(1:i)',kf2_acc(1:i)','poly1');
         plot(board_pos(1:i),kf2_acc(1:i),'.r')
         hold on 
-        plot(board_pos(1:i),m.p1*board_pos(1:i),'-b')
+        plot(board_pos,m.p1*board_pos,'-b')
     
         % axis equal
         

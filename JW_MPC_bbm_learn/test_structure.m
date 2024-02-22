@@ -13,8 +13,9 @@ qd_des = [-.0; 0; 0; 0];
 
 [Th,Nodes,xd_lb,xd_ub] = DevMPC6();
 
+k_model = 5.886;
 
-[qd, ud] = RunMPC6(Th,Nodes,qd_i,qd_des,xd_lb,xd_ub);   
+[qd, ud] = RunMPC6(Th,Nodes,qd_i,qd_des,xd_lb,xd_ub,k_model);   
 
 t_traj = linspace(0,Th,Nodes);
 
