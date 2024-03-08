@@ -1,10 +1,10 @@
 clc;clear;close all;
 
-M = readmatrix("data/mpc_1dlearn_2024_02_22-06_09_37_PM.csv");
-videoname = '/home/orl/Downloads/homecart_misc/videos/out_02_22_2024_1834.avi';
-numFrames = 328-1;
-prefix = '/home/orl/Downloads/vid2pix/t22/frame';
-pt = -0.007799287459543922;
+M = readmatrix("data/mpc_1dlearn_2024_02_23-04_48_32_PM.csv");
+videoname = '/home/orl/Downloads/homecart_misc/videos/out_02_23_2024_1649.avi';
+numFrames = 330-1;
+prefix = '/home/orl/Downloads/vid2pix/t23/frame';
+pt = -0.004175253072915175;
 
 %%
 time = M(1,:);
@@ -101,7 +101,7 @@ for i=1:size(time,2)
 
     % generate x traj
     x0 = [ball_pos(i), ball_vel(i), board_pos(i), ball_jerk(i)]';
-    [x_traj, u_traj] = RunMPC6(Th,Nodes,x0,qd_des,xd_lb,xd_ub,kmodel(i));   
+    [x_traj, u_traj] = RunMPC6(Th,Nodes,x0,qd_des,xd_lb,xd_ub, min(max(kmodel(i),0.1),10.0) );   
 
     plot(time(1:i),ball_pos(1:i),'.-b',"MarkerSize",12)
     hold on; plot([min(time) max(time)],[ball_pos(1) ball_pos(1)],'--r'); 
