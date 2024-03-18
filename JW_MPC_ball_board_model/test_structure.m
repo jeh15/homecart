@@ -5,7 +5,7 @@ addpath(genpath([pwd '/Functions']))
 %% Setup the MPC Problem
 
 % Initial States - [x; dx; ddx]
-qd_i = [-.2; 0; 0; 0];
+qd_i = [.1; 0; 0.2; 0];
 
 % Desired State - [x; dx; ddx]
 qd_des = [-.0; 0; 0; 0];
