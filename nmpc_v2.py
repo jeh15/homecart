@@ -197,7 +197,7 @@ last_board_time = time.time()
 # Fixed acceleration
 fix_ur5_acc = 3.5
 maxvel = 10.0 # previously 10.0
-test_duration = 30.0
+test_duration = 10.0
 iteration = 0
 # -----------------------------------------------------------
 
@@ -277,14 +277,13 @@ try:
             board_vel_data = np.append(board_vel_data, board_vel)
 
             # get target velocity
-            qd_i = matlab.double([[q[0]], [q[1]], [q[2]], [q[3]]])
-            qd_des = matlab.double([[xt], [0.0], [0.0], [0.0]])
+            # qd_i = matlab.double([[q[0]], [q[1]], [q[2]], [q[3]]])
+            # qd_des = matlab.double([[xt], [0.0], [0.0], [0.0]])
 
             # NMPC
-            [qd,ud] = eng.RunMPC6(Th,Nodes,qd_i,qd_des,xd_lb,xd_ub,nargout=2)
+            ud = eng.nmpc_new(q[0], q[1], q[2], q[3], xt, nargout = 1)
             # vt = -ud[0][1]
-            vt = ud[0][0]
-            vt_clip = np.clip(vt, -maxvel, maxvel)
+            vt_clip = np.clip(ud, -maxvel, maxvel)
             time_data = np.append(time_data, time.time() - initial_time)
             tool_speed[4] = copy.deepcopy(vt_clip)
             targ_vel_data = np.append(targ_vel_data, vt_clip)

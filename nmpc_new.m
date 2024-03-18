@@ -27,7 +27,7 @@ function out = nmpc_new(x1,x2,x3,x4,xt)
     u0   = 0.05*ones(1,N);  % initial input guess
     ulim = 10.0;
     uslim = 0.25;
-    filename = 'data/u_mar_18_2024_1303.csv';
+    filename = 'data/u_mar_18_2024_1530.csv';
 
     costQ =  1.0*[1.0  0    0     0;
                   0    0.1  0     0;
@@ -231,7 +231,7 @@ function out = nmpc_new(x1,x2,x3,x4,xt)
     
     
 
-    out = u_new;
+    out = u_new(1);
 end
 
 %==========================================================================
