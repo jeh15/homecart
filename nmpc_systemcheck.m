@@ -1,4 +1,4 @@
-function [xout,u_new] = nmpc_new(x1,x2,x3,x4,xt)            
+function out = nmpc_systemcheck(x1,x2,x3,x4,xt)            
 %==========================================================================    
 % Goal: Solve the tossing of a mass into a bowl problem
 % 
@@ -14,8 +14,8 @@ function [xout,u_new] = nmpc_new(x1,x2,x3,x4,xt)
 % MPC settings
 %==========================================================================    
     Tfinal = 1.0*10;         % Tfinal for simulation
-    N      = 10;             % Number of nodes (horizon)
-    Th     = 1/13;            % MPC Time horizon
+    N      = 11;             % Number of nodes (horizon)
+    Th     = 1.0*0.5;            % MPC Time horizon
     Tc     = 0.1;            % Control Time horizon
     
     xmeasure = [x1 x2 x3 x4];     
@@ -29,11 +29,11 @@ function [xout,u_new] = nmpc_new(x1,x2,x3,x4,xt)
     uslim = 0.25;
     filename = 'data/u_mar_18_2024_1530.csv';
 
-    costQ =  2*0.2*[2 0     0        0;
-                    0 5*0.2 0        0;
-                    0 0     0.000001 0;
-                    0 0     0        0.000001];
-    costR = 1e-2;
+    costQ =  1.0*[1.0  0    0     0;
+                  0    0.1  0     0;
+                  0    0    1e-6  0;
+                  0    0    0     1e-6];
+    costR = 1e-6;
 
     % task state constraint - set state limits
     sig = 20*.1*.1*0.08;             % sigma of Gaussian distribution -> covariance matrix with sigma^2 (here: uncertainty considered)
@@ -84,10 +84,10 @@ function [xout,u_new] = nmpc_new(x1,x2,x3,x4,xt)
     K = m*g / (m+(Jz/rr^2));
     
     
-    Ac = [0 1 0 0;
-          0 0 K 0;
-          0 0 0 1;
-          0 0 0 -15]; % originally -31 newish -17 BETTER = -15
+    Ac = [0  1  0   0;
+          0  0  K   0;
+          0  0  0   1;
+          0  0  0  -15]; % originally -31 newish -17 BETTER = -15
     Bc = [ 0 ;
            0 ;
            0 ;
@@ -113,6 +113,7 @@ function [xout,u_new] = nmpc_new(x1,x2,x3,x4,xt)
     params.xt = xt;
     params.costQ = costQ;
     params.costR = costR;
+    params.xinit = xmeasure;
     % uslim
     rng('shuffle');                 % random seed
     s = rng;                        % save rng setting
@@ -227,10 +228,9 @@ function [xout,u_new] = nmpc_new(x1,x2,x3,x4,xt)
                       atol_ode_sim, rtol_ode_sim, type, iprint, ...
                       exitflag, output, t_Elapsed);
 
+
     % writematrix(u_new,filename,'WriteMode','append')
     
-    
-
     xout = computeOpenloopSolution(@system, N, Th, t0, x0, u_new, ...
                                          atol_ode_sim, rtol_ode_sim, type, sig, params);
 
@@ -352,10 +352,10 @@ function [c,ceq] = nonlinearconstraints(constraints, ...
         ceq = [ceq ceqnew];
     end
 
-    % for i=1:N-1
-    %     c(end+1) = (u(i+1) - u(i)) - uslim;
-    %     c(end+1) = -(u(i+1) - u(i)) - uslim;
-    % end
+    for i=1:N-1
+        c(end+1) = (u(i+1) - u(i)) - uslim;
+        c(end+1) = -(u(i+1) - u(i)) - uslim;
+    end
     
 
     [cnew, ceqnew] = terminalconstraints(t0+(N+1)*Th,x(N+1,:),params);
@@ -433,8 +433,8 @@ function [c,ceq] = constraints(t, x, u, gamma1, gamma2, K, params)
     K = [0,0,0,0];
    
     % Control limit
-    % c(end+1) = (u(1) - K*[x(1); x(2); x(3); x(4)]) - ulim;
-    % c(end+1) = -(u(1) - K*[x(1); x(2); x(3); x(4)]) - ulim;
+    c(end+1) = (u(1) - K*[x(1); x(2); x(3); x(4)]) - ulim;
+    c(end+1) = -(u(1) - K*[x(1); x(2); x(3); x(4)]) - ulim;
     
     % for i=1:ul-1
     %     c(end+1) = (u(i+1) - u(i)) - uslim;
@@ -456,6 +456,8 @@ end
 %                           terminal constraints
 %==========================================================================
 function [c,ceq] = terminalconstraints(t,x,params)
+    % xinit = params.xinit;
+    % disp(x)
     c   = [];
     ceq   = [];
 end

@@ -1,4 +1,4 @@
-function [xout,u_new] = nmpc_new(x1,x2,x3,x4,xt)            
+function [xout,u_new] = smpc(x1,x2,x3,x4,xt)            
 %==========================================================================    
 % Goal: Solve the tossing of a mass into a bowl problem
 % 
@@ -35,12 +35,15 @@ function [xout,u_new] = nmpc_new(x1,x2,x3,x4,xt)
                     0 0     0        0.000001];
     costR = 1e-2;
 
-    % task state constraint - set state limits
-    sig = 20*.1*.1*0.08;             % sigma of Gaussian distribution -> covariance matrix with sigma^2 (here: uncertainty considered)
+    %==========================================================================    
+    % SMPC task constraint  ->  |ball_pos| < 0.02
+    %==========================================================================        
+    % task state constraint - set state limits 
+    sig = 1e-8;             % sigma of Gaussian distribution -> covariance matrix with sigma^2 (here: uncertainty considered)
     beta = 0.8;            % smpc risk parameter, [0.5 to 0.999] (here: high beta means low risk)
-    targ = 2.1; del = 0.1; % ideal 2.1
+    targ = 0.0; del = 0.02; % ideal 2.1
     x1_limit = [targ-del,targ+del];         % limit for x1 - (chance) constraint -> final velocity
-    state = 2;        % 1,2,3,4 - position,velocity,acceleration,jerk
+    state = 1;        % 1,2,3,4 - position,velocity,acceleration,jerk
 
 %==========================================================================
 
@@ -332,7 +335,7 @@ function [c,ceq] = nonlinearconstraints(constraints, ...
 %==========================================================================            
     
     % compute covariance matrix propagation
-    % sigma_e = cov_propagation(N, sig,params);    
+    sigma_e = cov_propagation(N, sig,params);    
     % g = [-1;0];              % constraint: g*x < h -> x1 < x1_limit
     g1 = [0;0;0;0];              % constraint: g*x < h -> x1 < x1_limit
     g2 = [0;0;0;0];              % constraint: g*x < h -> x1 < x1_limit
@@ -344,9 +347,9 @@ function [c,ceq] = nonlinearconstraints(constraints, ...
     
     for k=1:N               % k=1 refers to the initial state, so (technically) no state constraint necessary, but k=1 necessary for input constraint
 
-        % gamma1 = sqrt(2*g1'*sigma_e(:,:,k)*g1)*erfinv(2*beta-1);                   % constraint tightening
-        % gamma2 = sqrt(2*g2'*sigma_e(:,:,k)*g2)*erfinv(2*beta-1);                   % constraint tightening
-        [cnew, ceqnew] = constraints(t0+k*Th,x(k,:),u(:,k), 0, 0, K, params);   % generate constraints
+        gamma1 = sqrt(2*g1'*sigma_e(:,:,k)*g1)*erfinv(2*beta-1);                   % constraint tightening
+        gamma2 = sqrt(2*g2'*sigma_e(:,:,k)*g2)*erfinv(2*beta-1);                   % constraint tightening
+        [cnew, ceqnew] = constraints(t0+k*Th,x(k,:),u(:,k), gamma1, gamma2, K, params);   % generate constraints
 
         c = [c cnew];
         ceq = [ceq ceqnew];
@@ -373,7 +376,7 @@ function x = computeOpenloopSolution(system, N, Th, t0, x0, u, ...
                                      atol_ode_sim, rtol_ode_sim, type, sig, params)
     x(1,:) = x0;
 
-    uncertainty_flag = 0;
+    uncertainty_flag = 1;
     for k=1:N
         x(k+1,:) = dynamic(system, Th, t0, x(k,:), u(:,k), ...
                              atol_ode_sim, rtol_ode_sim, type, uncertainty_flag, sig, params);
@@ -446,8 +449,8 @@ function [c,ceq] = constraints(t, x, u, gamma1, gamma2, K, params)
 %==========================================================================            
     % Chance Constraint
     % gamma1 - min , gamma2 - max
-    % c(end+1) = -x(params.state) + x1_limit(1) + gamma1;            % g'*x-2.8 = [1 0]*[x(1);x(2)]-2.8
-    % c(end+1) =  x(params.state) - x1_limit(2)  + gamma2;            % g'*x-2.8 = [1 0]*[x(1);x(2)]-2.8
+    c(end+1) = -x(params.state) + x1_limit(1) + gamma1;            % g'*x-2.8 = [1 0]*[x(1);x(2)]-2.8
+    c(end+1) =  x(params.state) - x1_limit(2)  + gamma2;            % g'*x-2.8 = [1 0]*[x(1);x(2)]-2.8
 
     ceq = [];
 

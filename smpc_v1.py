@@ -281,7 +281,7 @@ try:
             # qd_des = matlab.double([[xt], [0.0], [0.0], [0.0]])
 
             # NMPC
-            [xout,u_new] = eng.nmpc_new(q[0], q[1], q[2], q[3], xt, nargout = 2)
+            [xout,u_new] = eng.smpc(q[0], q[1], q[2], q[3], xt, nargout = 2)
             vt = u_new[0][0]
             vt_clip = np.clip(vt, -maxvel, maxvel)
             time_data = np.append(time_data, time.time() - initial_time)
@@ -308,7 +308,7 @@ finally:
 
     data = np.vstack((time_data,  ball_pos_data, ball_vel_data, board_pos_data, board_vel_data, targ_vel_data))
     timestamp = datetime.now().strftime("%Y_%m_%d-%I_%M_%S_%p")
-    filename = "./data/nmpcv2_" + timestamp + ".csv"
+    filename = "./data/smpc_v1_" + timestamp + ".csv"
     np.savetxt(filename, data, delimiter=',')
     out.release()
     cv2.destroyAllWindows()

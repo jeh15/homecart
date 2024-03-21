@@ -1,11 +1,14 @@
 clc;clear;close all;
 
-M = readmatrix("data/nmpcv2_2024_03_18-07_30_40_PM.csv");
-videoname = '/home/orl/Downloads/homecart_misc/videos/out_03_19_2024_1230.avi';
-numFrames = 26-1;
-prefix = '/home/orl/Downloads/vid2pix/tx1/frame';
-pt = 0.00253352950354789;
+M = readmatrix("data/nmpcv2_2024_03_20-07_42_37_PM.csv");
+videoname = '/home/orl/Downloads/homecart_misc/videos/out_03_20_2024_1945.avi';
+numFrames = 250-1;
+prefix = '/home/orl/Downloads/vid2pix/tx4/frame';
+pt = -0.0034770493516508333;
 
+Th = 1/13;
+
+Nodes = 10;
 %%
 time = M(1,:);
 ball_pos = M(2,:);
@@ -53,10 +56,10 @@ xlabel("Time (s)")
 ylabel(" target Velocity (m/s)")
 
 %% MPC
-addpath(genpath([pwd '/JW_MPC_ball_board_model/Functions']))
-addpath(genpath([pwd '/JW_MPC_ball_board_model']))
-[Th,Nodes,xd_lb,xd_ub] = DevMPC6();
-qd_des = [pt,0,0,0]';
+% addpath(genpath([pwd '/JW_MPC_ball_board_model/Functions']))
+% addpath(genpath([pwd '/JW_MPC_ball_board_model']))
+% [Th,Nodes,xd_lb,xd_ub] = DevMPC6();
+% qd_des = [pt,0,0,0]';
 
 %% loop plot
 
@@ -79,7 +82,8 @@ ylarm = [-10 10];
 ylbv = [-2 2]; 
 
 
-t_traj = 0:Th/(Nodes-1):Th;
+t_traj = 0:Th/(Nodes):Th;
+t_traj2 = 0:Th/(Nodes-1):Th;
 
 figure
 set(gcf, 'Position', get(0, 'Screensize'));
@@ -87,24 +91,31 @@ set(gcf, 'Position', get(0, 'Screensize'));
 pause(.1)
 
 writerObj = VideoWriter(videoname); % Name it.
-writerObj.FrameRate = 30; % How many frames per second.
+writerObj.FrameRate = 29; % How many frames per second.
 open(writerObj);
 
 
-for i=1:size(time,2)
+for i=1:numFrames+1
+    % i=83;
 % ===== ball pos ====    
     subplot(4,2,1)
     % subplot(1,2,1)
 
     % generate x traj
     x0 = [ball_pos(i), ball_vel(i), ball_acc(i), ball_jerk(i)]';
-    [x_traj, u_traj] = RunMPC6(Th,Nodes,x0,qd_des,xd_lb,xd_ub);   
+
+    [x_traj,u_traj] = nmpc_new(ball_pos(i), ball_vel(i), ball_acc(i), ball_jerk(i),pt);
+    
+    % x_traj = out(:,1:end-1);
+    % u_traj = out(:,end);
+
+    % [x_traj, u_traj] = RunMPC6(Th,Nodes,x0,qd_des,xd_lb,xd_ub);   
 
     plot(time(1:i),ball_pos(1:i),'.-b',"MarkerSize",12)
     hold on; plot([min(time) max(time)],[ball_pos(1) ball_pos(1)],'--r'); 
 
     % plot t traj
-    plot(time(i) + t_traj,x_traj(1,:)','.-r');
+    plot(time(i) + t_traj,x_traj(:,1),'.-r');
 
     hold off
     % axis(p_ax)
@@ -123,7 +134,7 @@ for i=1:size(time,2)
     plot(time(1:i),ball_vel(1:i),'.-b',"MarkerSize",12)
     
     hold on    
-    plot(time(i) + t_traj,x_traj(2,:)','.-r');
+    plot(time(i) + t_traj,x_traj(:,2)','.-r');
     hold on; plot([min(time) max(time)],[0 0],'--r'); 
     
     hold off    
@@ -147,7 +158,7 @@ for i=1:size(time,2)
     plot(time(1:i),ball_acc(1:i),'.-b',"MarkerSize",12)
     
     hold on    
-    plot(time(i) + t_traj,x_traj(3,:)','.-r');
+    plot(time(i) + t_traj,x_traj(:,3)','.-r');
     hold off    
 
    
@@ -167,7 +178,7 @@ for i=1:size(time,2)
     plot(time(1:i),ball_jerk(1:i),'.-b',"MarkerSize",12)
     
     hold on    
-    plot(time(i) + t_traj,x_traj(4,:)','.-r');
+    plot(time(i) + t_traj,x_traj(:,4)','.-r');
     hold off    
 
    
@@ -186,7 +197,7 @@ for i=1:size(time,2)
     % subplot(1,2,2)
     plot(time(1:i),target_vel(1:i),'.-b',"MarkerSize",12)
     hold on
-    plot(time(i)+t_traj,u_traj,'.-r',"MarkerSize",12)
+    plot(time(i)+t_traj2,u_traj,'.-r',"MarkerSize",12)
     plot([min(time) max(time)],[0 0],'--r')    
     hold off
     % axis([0-.1 .5+.1 -0.21 .21])

@@ -22,8 +22,10 @@ print("Matlab engine started.")
 
 
 # NMPC
-out = eng.nmpc_new(0.1,0.0,0.2,0.0,0.0)
-print(type(out))
+[xout,u_new] = eng.nmpc_new(0.1,0.0,0.2,0.0,0.0,nargout=2)
+print(u_new[0][0])
+# print(type(np.asarray(out)))
+# print(np.asarray(out[-1:]))
 # plt.plot(np.asarray(out[0])[0])
 # plt.plot([-3.0000988301171114,-2.7500988302650073,-2.500098830456186,-2.250098828036735,-2.0000988279284297,-1.7500988277715634,-1.5000988278660978,-1.2500988286043628,-1.0000988286043628,-0.7500988286043628,-0.5000988286043628])
 # plt.show()
