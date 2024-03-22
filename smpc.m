@@ -39,7 +39,7 @@ function [xout,u_new] = smpc(x1,x2,x3,x4,xt)
     % SMPC task constraint  ->  |ball_pos| < 0.02
     %==========================================================================        
     % task state constraint - set state limits 
-    sig = 1e-8;             % sigma of Gaussian distribution -> covariance matrix with sigma^2 (here: uncertainty considered)
+    sig = 1e-16;%8             % sigma of Gaussian distribution -> covariance matrix with sigma^2 (here: uncertainty considered)
     beta = 0.8;            % smpc risk parameter, [0.5 to 0.999] (here: high beta means low risk)
     targ = 0.0; del = 0.02; % ideal 2.1
     x1_limit = [targ-del,targ+del];         % limit for x1 - (chance) constraint -> final velocity

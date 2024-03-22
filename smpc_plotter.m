@@ -1,10 +1,10 @@
 clc;clear;close all;
 
-M = readmatrix("data/smpc_v1_2024_03_21-06_33_02_PM.csv");
-videoname = '/home/orl/Downloads/homecart_misc/videos/out_03_21_2024_1851.avi';
-numFrames = 5-1;
-prefix = '/home/orl/Downloads/vid2pix/smpct1/frame';
-pt = -0.004433364358108513;
+M = readmatrix("data/smpc_v1_2024_03_22-03_44_56_PM.csv");
+videoname = '/home/orl/Downloads/homecart_misc/videos/out_03_22_2024_1548.avi';
+numFrames = 27-1;
+prefix = '/home/orl/Downloads/vid2pix/smpct2/frame';
+pt = -0.0024765599332838084;
 
 Th = 1/13;
 
@@ -91,7 +91,7 @@ set(gcf, 'Position', get(0, 'Screensize'));
 pause(.1)
 
 writerObj = VideoWriter(videoname); % Name it.
-writerObj.FrameRate = 29; % How many frames per second.
+writerObj.FrameRate = 10; % How many frames per second.
 open(writerObj);
 
 
@@ -104,7 +104,7 @@ for i=1:numFrames+1
     % generate x traj
     x0 = [ball_pos(i), ball_vel(i), ball_acc(i), ball_jerk(i)]';
 
-    [x_traj,u_traj] = nmpc_new(ball_pos(i), ball_vel(i), ball_acc(i), ball_jerk(i),pt);
+    [x_traj,u_traj] = smpc(ball_pos(i), ball_vel(i), ball_acc(i), ball_jerk(i),pt);
     
     % x_traj = out(:,1:end-1);
     % u_traj = out(:,end);
