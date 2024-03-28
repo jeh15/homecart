@@ -33,14 +33,14 @@ function [xout,u_new] = smpc(x1,x2,x3,x4,xt)
                     0 5*0.2 0        0;
                     0 0     0.000001 0;
                     0 0     0        0.000001];
-    costR = 1e-2;
+    costR = 1e-2; % last 1e-2
 
     %==========================================================================    
     % SMPC task constraint  ->  |ball_pos| < 0.02
     %==========================================================================        
     % task state constraint - set state limits 
-    sig = 1e-16;%8             % sigma of Gaussian distribution -> covariance matrix with sigma^2 (here: uncertainty considered)
-    beta = 0.8;            % smpc risk parameter, [0.5 to 0.999] (here: high beta means low risk)
+    sig = 1e-14;%8 %16-good            % sigma of Gaussian distribution -> covariance matrix with sigma^2 (here: uncertainty considered)
+    beta = 0.95; %0.8           % smpc risk parameter, [0.5 to 0.999] (here: high beta means low risk)
     targ = 0.0; del = 0.02; % ideal 2.1
     x1_limit = [targ-del,targ+del];         % limit for x1 - (chance) constraint -> final velocity
     state = 1;        % 1,2,3,4 - position,velocity,acceleration,jerk
@@ -487,8 +487,8 @@ function y = system(t, x, u, Th, apply_flag, sig, params)
     
     if apply_flag == 1
         D = [0 0 0 0;
+             0 1 0 0;
              0 0 0 0;
-             0 0 1 0;
              0 0 0 0];
         w = [0;0;0;0];
         w(1) = normrnd(0,sig);
@@ -515,8 +515,8 @@ function sigma_e = cov_propagation(N, sig, params)
     
     K = [0 0 0 0];    
     D = [0 0 0 0;
+         0 1 0 0;
          0 0 0 0;
-         0 0 1 0;
          0 0 0 0];
 
     phi = A-B*K;
