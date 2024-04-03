@@ -1,4 +1,4 @@
-function [xout,u_new] = smpc(x1,x2,x3,x4,xt)            
+function [xout,u_new] = smpc2(x1,x2)            
 %==========================================================================    
 % Goal: Solve the tossing of a mass into a bowl problem
 % 
@@ -15,35 +15,35 @@ function [xout,u_new] = smpc(x1,x2,x3,x4,xt)
 %==========================================================================    
     Tfinal = 1.0*10;         % Tfinal for simulation
     N      = 10;             % Number of nodes (horizon)
-    Th     = 1/18;            % MPC Time horizon (prev 13)
+    Th     = 0.1;            % MPC Time horizon (prev 13)
     Tc     = 0.1;            % Control Time horizon
     
-    xmeasure = [x1 x2 x3 x4];     
+    xmeasure = [x1 x2];     
     % state - [ballpos, ballvel, boardpos, boardvel]
 
     tmeasure = 0.0;        % initial time (do not change)
 
     % control input settings
-    u0   = 0.05*ones(1,N);  % initial input guess
+    u0   = 0.6*ones(1,N);  % initial input guess - [u(N), beta]
+    beta0   = 0.6;  % initial input guess - [u(N), beta]
+
     ulim = 10.0;
     uslim = 0.25;
     filename = 'data/u_mar_18_2024_1530.csv';
 
-    costQ =  2*0.2*[2 0     0        0;
-                    0 5*0.2 0        0;
-                    0 0     0.000001 0;
-                    0 0     0        0.000001];
-    costR = 1e-2; % last 1e-2
+    costQ = 0.0*[1 0 ; 0 .1];
+
+    costR = 1e-8; % last 1e-2
 
     %==========================================================================    
     % SMPC task constraint  ->  |ball_pos| < 0.02
     %==========================================================================        
     % task state constraint - set state limits 
-    sig = 1e-14;%8 %16-good            % sigma of Gaussian distribution -> covariance matrix with sigma^2 (here: uncertainty considered)
-    beta = 0.95; %0.8                  % smpc risk parameter, [0.5 to 0.999] (here: high beta means low risk)
+    sig = 0.1;                %8 %16-good            % sigma of Gaussian distribution -> covariance matrix with sigma^2 (here: uncertainty considered)
+    % beta = 0.95;              %0.8                  % smpc risk parameter, [0.5 to 0.999] (here: high beta means low risk)
     targ = 0.0; del = 2*0.02; %0.02      % ideal 2.1
-    x1_limit = [targ-del,targ+del];         % limit for x1 - (chance) constraint -> final velocity
-    state = 1;        % 1,2,3,4 - position,velocity,acceleration,jerk
+    x1_limit = [0.9,targ+del];         % limit for x1 - (chance) constraint -> final velocity
+    state = 1;                % 1,2,3,4 - position,velocity,acceleration,jerk
 
 %==========================================================================
 
@@ -69,34 +69,32 @@ function [xout,u_new] = smpc(x1,x2,x3,x4,xt)
     
     % q - [x dx ddx dddx] - { x - distance along pan(inclined plane) }
     
-    golf = 0;
-    if golf ==1
-        % m   = 0.003;       % Mass [kg]
-        m   = 0.046;       % Mass [kg]
-        rr   = 0.021;       % Radius [m]
-        % Jz  = .5*m*rr^2;    % Moment of inertia [kg.m2]
-        Jz  = (2/5)*m*rr^2;    % Moment of inertia [kg.m2]
-    else
-        m   = 0.003;       % Mass [kg]
-        % m   = 0.046;       % Mass [kg]
-        rr   = 0.02;       % Radius [m]
-        % Jz  = .5*m*rr^2;    % Moment of inertia [kg.m2]
-        Jz  = (2/3)*m*rr^2;    % Moment of inertia [kg.m2]
-    end
-    g   = 9.81;        % Gravity [m/s2]
-    K = m*g / (m+(Jz/rr^2));
+    % golf = 0;
+    % if golf ==1
+    %     % m   = 0.003;       % Mass [kg]
+    %     m   = 0.046;       % Mass [kg]
+    %     rr   = 0.021;       % Radius [m]
+    %     % Jz  = .5*m*rr^2;    % Moment of inertia [kg.m2]
+    %     Jz  = (2/5)*m*rr^2;    % Moment of inertia [kg.m2]
+    % else
+    %     m   = 0.003;       % Mass [kg]
+    %     % m   = 0.046;       % Mass [kg]
+    %     rr   = 0.02;       % Radius [m]
+    %     % Jz  = .5*m*rr^2;    % Moment of inertia [kg.m2]
+    %     Jz  = (2/3)*m*rr^2;    % Moment of inertia [kg.m2]
+    % end
+    % g   = 9.81;        % Gravity [m/s2]
+    % K = m*g / (m+(Jz/rr^2));
     
     
-    Ac = [0 1 0 0;
-          0 0 K 0;
-          0 0 0 1;
-          0 0 0 -15]; % originally -31 newish -17 BETTER = -15
+    Ac = [0 1;
+          0 0]; % originally -31 newish -17 BETTER = -15
+    
     Bc = [ 0 ;
-           0 ;
-           0 ;
-           10 ]; % originally 29 newish 16 BETTER = 10
-
-    Cc = [1 0 0 0];
+           1 ]; % originally 29 newish 16 BETTER = 10
+    
+    Cc = [1 0];
+    
     Dc = 0;
     
     [sysd,G] = c2d(ss(Ac,Bc,Cc,Dc),Th,'zoh');
@@ -113,7 +111,7 @@ function [xout,u_new] = smpc(x1,x2,x3,x4,xt)
 %    params.delta = delta;
     params.state = state;
     params.Tc = Tc;
-    params.xt = xt;
+    % params.xt = xt;
     params.costQ = costQ;
     params.costR = costR;
     % uslim
@@ -220,8 +218,8 @@ function [xout,u_new] = smpc(x1,x2,x3,x4,xt)
     [u_new, V_current, exitflag, output] = solveOptimalControlProblem ...
         (@runningcosts, @terminalcosts, @constraints, ...
         @terminalconstraints, @linearconstraints, @system, @cov_propagation, ...
-        N, t0, x0, u0, Th, ...
-        sig, beta, params, ...
+        N, t0, x0, [u0,beta0], Th, ...
+        sig, params, ...
         atol_ode_sim, rtol_ode_sim, tol_opt, options, type);
     t_Elapsed = toc( t_Start );
 
@@ -262,8 +260,12 @@ end
 %==========================================================================
 function [u, V, exitflag, output] = solveOptimalControlProblem ...
     (runningcosts, terminalcosts, constraints, terminalconstraints, ...
-    linearconstraints, system, cov_propagation, N, t0, x0, u0, Th, sig, beta, params, ...
+    linearconstraints, system, cov_propagation, N, t0, x0, ubeta, Th, sig, params, ...
     atol_ode_sim, rtol_ode_sim, tol_opt, options, type)
+    
+    u0= ubeta(1:end-1);
+    beta0 = ubeta(end);
+    
     x = zeros(N+1, length(x0));
     x = computeOpenloopSolution(system, N, Th, t0, x0, u0, ...
                                 atol_ode_sim, rtol_ode_sim, type, sig, params);
@@ -288,10 +290,10 @@ function [u, V, exitflag, output] = solveOptimalControlProblem ...
     
     % Solve optimization problem
     % tic
-    [u, V, exitflag, output] = fmincon(@(u) costfunction(runningcosts, ...
+    [u, V, exitflag, output] = fmincon(@(u,beta) costfunction(runningcosts, ...
         terminalcosts, system, N, Th, t0, x0, ...
-        u, atol_ode_sim, rtol_ode_sim, type, sig, params), u0, A, b, Aeq, beq, lb, ...
-        ub, @(u) nonlinearconstraints(constraints, terminalconstraints, ...
+        u, atol_ode_sim, rtol_ode_sim, type, sig, params, beta), [u0,beta0], A, b, Aeq, beq, lb, ...
+        ub, @(u,beta) nonlinearconstraints(constraints, terminalconstraints, ...
         system, cov_propagation, N, Th, t0, x0, u, sig, beta, params, ...
         atol_ode_sim, rtol_ode_sim, type), options);
     % toc
@@ -301,7 +303,7 @@ end
 %==========================================================================
 function cost = costfunction(runningcosts, terminalcosts, system, ...
                     N, Th, t0, x0, u, ...
-                    atol_ode_sim, rtol_ode_sim, type, sig, params)
+                    atol_ode_sim, rtol_ode_sim, type, sig, params, beta)
     cost = 0;
     x = zeros(N+1, length(x0));
     x = computeOpenloopSolution(system, N, Th, t0, x0, u, ...
@@ -309,7 +311,7 @@ function cost = costfunction(runningcosts, terminalcosts, system, ...
     for k=1:N
         cost = cost+runningcosts(t0+k*Th, x(k,:), u(:,k),params);
     end
-    cost = cost+terminalcosts(t0+(N+1)*Th, x(N+1,:));
+    cost = cost+terminalcosts(t0+(N+1)*Th, x(N+1,:))-beta;
 end
 %==========================================================================
 %                           non linear constraints
@@ -335,20 +337,20 @@ function [c,ceq] = nonlinearconstraints(constraints, ...
 %==========================================================================            
     
     % compute covariance matrix propagation
-    sigma_e = cov_propagation(N, sig,params);    
+    sigma_e = cov_propagation(N,sig,params);    
     % g = [-1;0];              % constraint: g*x < h -> x1 < x1_limit
-    g1 = [0;0;0;0];              % constraint: g*x < h -> x1 < x1_limit
-    g2 = [0;0;0;0];              % constraint: g*x < h -> x1 < x1_limit
+    g1 = [0;0];              % constraint: g*x < h -> x1 < x1_limit
+    % g2 = [0;0;0;0];              % constraint: g*x < h -> x1 < x1_limit
     
     g1(params.state) = -1; % min
-    g2(params.state) = 1;  % max
+    % g2(params.state) = 1;  % max
 
-    K = [0,0,0,0];
+    K = [0,0];
     
     for k=1:N               % k=1 refers to the initial state, so (technically) no state constraint necessary, but k=1 necessary for input constraint
         gamma1 = sqrt(2*g1'*sigma_e(:,:,k)*g1)*erfinv(2*beta-1);                   % constraint tightening
-        gamma2 = sqrt(2*g2'*sigma_e(:,:,k)*g2)*erfinv(2*beta-1);                   % constraint tightening
-        [cnew, ceqnew] = constraints(t0+k*Th,x(k,:),u(:,k), gamma1, gamma2, K, params);   % generate constraints
+        % gamma2 = sqrt(2*g2'*sigma_e(:,:,k)*g2)*erfinv(2*beta-1);                   % constraint tightening
+        [cnew, ceqnew] = constraints(t0+k*Th,x(k,:),u(:,k), gamma1, K, params);   % generate constraints
 
         c = [c cnew];
         ceq = [ceq ceqnew];
@@ -404,11 +406,11 @@ end
 %==========================================================================
 function cost = runningcosts(t, x, u,params)
     
-    xt = params.xt;
+    % xt = params.xt;
 
     Q = params.costQ;
     R = params.costR;
-    xd = [xt,0,0,0];
+    xd = [0,0];
     cost = (x-xd)*Q*(x-xd)' + u(1)*R*u(1)';
     
 % next two lines only necessary for slack variable
@@ -426,13 +428,13 @@ end
 %==========================================================================
 %                           constraints
 %==========================================================================
-function [c,ceq] = constraints(t, x, u, gamma1, gamma2, K, params)
+function [c,ceq] = constraints(t, x, u, gamma1, K, params)
 
     x1_limit = params.x1_limit;                       % get x1 constraint    
     ulim = params.ulim;                       % get x1 constraint    
     uslim = params.uslim;                       % get x1 constraint    
     c   = [];
-    K = [0,0,0,0];
+    K = [0,0];
    
     % Control limit
     % c(end+1) = (u(1) - K*[x(1); x(2); x(3); x(4)]) - ulim;
@@ -449,7 +451,7 @@ function [c,ceq] = constraints(t, x, u, gamma1, gamma2, K, params)
     % Chance Constraint
     % gamma1 - min , gamma2 - max
     c(end+1) = -x(params.state) + x1_limit(1) + gamma1;            % g'*x-2.8 = [1 0]*[x(1);x(2)]-2.8
-    c(end+1) =  x(params.state) - x1_limit(2)  + gamma2;            % g'*x-2.8 = [1 0]*[x(1);x(2)]-2.8
+    % c(end+1) =  x(params.state) - x1_limit(2)  + gamma2;            % g'*x-2.8 = [1 0]*[x(1);x(2)]-2.8
 
     ceq = [];
 
@@ -480,9 +482,9 @@ function y = system(t, x, u, Th, apply_flag, sig, params)
     A = params.sysA;
     B = params.sysB;
     % K = [0.8151    2.7097   11.8373    3.7545];    
-    K = [0,0,0,0];
+    K = [0,0];
     
-    y = A*x'+B*(u(1,1) - K*[x(1); x(2); x(3); x(4)]);
+    y = A*x'+B*(u(1,1) - K*[x(1); x(2)]);
     
     if apply_flag == 1
         D = [1 0 0 0;
@@ -502,25 +504,21 @@ end
 %                           cov propagation
 %==========================================================================
 function sigma_e = cov_propagation(N, sig, params)
-    w_cov = [sig^2 0 0 0;
-             0 sig^2 0 0;
-             0 0 sig^2 0;
-             0 0 0 sig^2];
+    w_cov = [sig^2 0;
+             0 sig^2];
     A = params.sysA;
     B = params.sysB;
 %==========================================================================
 %       SMPC settings
 %==========================================================================            
     
-    K = [0 0 0 0];    
-    D = [0 0 0 0;
-         0 1 0 0;
-         0 0 0 0;
-         0 0 0 0];
+    K = [0 0];    
+    D = [0 0;
+         0 1];
 
     phi = A-B*K;
 
-    sigma_e = zeros(4,4,N);
+    sigma_e = zeros(2,2,N);
 
     for i = 2:N
         sigma_e(:,:,i) = phi*sigma_e(:,:,i-1)*phi' + D*w_cov*D';
