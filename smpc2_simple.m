@@ -1,4 +1,4 @@
-function [xout,u_new] = smpc2_simple(x1,x2)            
+function [xout,u_new,exitflag] = smpc2_simple(x1,x2)            
 
 %==========================================================================    
 %   Traj Opt settings
@@ -23,7 +23,7 @@ function [xout,u_new] = smpc2_simple(x1,x2)
 %   SMPC settings
 %==========================================================================    
 
-    sig = 0.1;        % covariance matrix with sigma^2 (here: uncertainty considered)
+    sig = 0.5;        % covariance matrix with sigma^2 (here: uncertainty considered)
     x1_limit = 0.9; 
     state = 1;        % 1,2,3,4 - position,velocity,acceleration,jerk
 
@@ -33,21 +33,33 @@ function [xout,u_new] = smpc2_simple(x1,x2)
     tol_opt       = 1e-8; 
     options = optimset('Display','off',...
         'TolFun', tol_opt,...
-        'MaxIter', 10000,...
-        'Algorithm', 'active-set',...
+        'MaxIter', 10000000,...
+        'Algorithm', 'interior-point',...
         'FinDiffType', 'forward',...
         'RelLineSrchBnd', [],...
         'RelLineSrchBndDuration', 1,...
-        'TolConSQP', 1e-6);
-    
+        'TolConSQP', 1e-6,...
+        'MaxFunEvals',2*1e3);
+
+    % initial optim options------------------------------------------------
+    % options = optimset('Display','off',...
+    %     'TolFun', tol_opt,...
+    %     'MaxIter', 10000000,...
+    %     'Algorithm', 'interior-point',...
+    %     'FinDiffType', 'forward',...
+    %     'RelLineSrchBnd', [],...
+    %     'RelLineSrchBndDuration', 1,...
+    %     'TolConSQP', 1e-6,...
+    %     'MaxFunEvals',1e4);    
+
 %==========================================================================
 %                   System matrices
 %==========================================================================    
 
     Ac = [0 1;
           0 0]; 
-    Bc = [ 0 ;
-           1 ]; 
+    Bc = [0;
+          1]; 
     Cc = [1 0];
     Dc = 0;
     [sysd,G] = c2d(ss(Ac,Bc,Cc,Dc),Th,'zoh');
@@ -79,10 +91,9 @@ function [xout,u_new] = smpc2_simple(x1,x2)
         options);
 
 
-    xout = computeOpenloopSolution(@system, N, Th, x0, u_new, ...
+    xout = computeOpenloopSolution(@system, N, Th, xmeasure, u_new(1:end-1), ...
                                          sig, params);
 
-    out = [xout(2:end,:),u_new'];
 end
 
 %==========================================================================
@@ -112,11 +123,14 @@ function [u, V, exitflag, output] = solveOptimalControlProblem ...
     
     % Solve optimization problem
     % tic
-    [u, V, exitflag, output] = fmincon(@(u,beta) costfunction(runningcosts, system, N, Th, x0, u, sig, params, beta), ...
+    [u, V, exitflag, output] = fmincon(@(u) costfunction(runningcosts, system, N, Th, x0, u, sig, params), ...
         [u0,beta0], ...
         A, b, Aeq, beq, lb, ub, ...
-        @(u,beta) nonlinearconstraints(constraints, system, cov_propagation, N, Th, x0, u, sig, beta, params), options);
+        @(u) nonlinearconstraints(constraints, system, cov_propagation, N, Th, x0, u, sig, params), options);
     % toc
+
+    % disp(exitflag)
+    % u = u(1:end-1);
 end
 
 %==========================================================================
@@ -125,8 +139,11 @@ end
 
 function cost = costfunction(runningcosts, system, ...
                     N, Th, x0, u, ...
-                    sig, params, beta)
+                    sig, params)
     cost = 0;
+
+
+    beta = u(end);
     x = zeros(N+1, length(x0));
     x = computeOpenloopSolution(system, N, Th, x0, u, ...
                                 sig, params);
@@ -142,9 +159,9 @@ end
 
 function [c,ceq] = nonlinearconstraints(constraints, ...
     system, cov_propagation, ...
-    N, Th, x0, u, sig, beta, params)
+    N, Th, x0, u, sig, params)
 
-
+    beta = u(end);
 
     x = zeros(N+1, length(x0));
     x = computeOpenloopSolution(system, N, Th, x0, u, ...
@@ -165,13 +182,21 @@ function [c,ceq] = nonlinearconstraints(constraints, ...
     g1(params.state) = -1; % min
     K = [0,0];
     
+    umax = 1.0;
+
     for k=1:N               
         gamma1 = sqrt(2*g1'*sigma_e(:,:,k)*g1)*erfinv(2*beta-1);                   % constraint tightening
         [cnew, ceqnew] = constraints(x(k,:),u(:,k), gamma1, K, params);   % generate constraints
 
+        c(end+1) = u(k) - umax;
+        c(end+1) = -u(k) - umax;
+
+
         c = [c cnew];
         ceq = [ceq ceqnew];
     end
+    c(end+1) = u(end) - 1.0;
+    c(end+1) = -u(end) + 0.5;
 
 
     c = [c cnew];
@@ -253,7 +278,19 @@ function y = system(x, u, Th, apply_flag, sig, params)
     K = [0,0];
     
     y = A*x'+B*(u(1,1) - K*[x(1); x(2)]);
-    
+
+
+    if apply_flag == 1
+%         D = [1 0; 0 1];
+        D = [0 0; 0 1];
+        w = [0;0];
+        % Gaussian noise with variance sig^2
+        w(1) = normrnd(0,sig);
+        w(2) = normrnd(0,sig);
+        % determine next state with uncertainty
+        y = y + D*w;
+    end
+
     y = y';    
 end
 
