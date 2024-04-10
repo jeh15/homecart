@@ -1,4 +1,4 @@
-function [xout,u_new,exitflag] = smpc2_4d(x1,x2,x3,x4,xt)            
+function [xout,u_new,exitflag] = smpc2b(x1,x2,x3,x4,xt)            
 
 %==========================================================================    
 %   Traj Opt settings
@@ -8,8 +8,9 @@ function [xout,u_new,exitflag] = smpc2_4d(x1,x2,x3,x4,xt)
     Th     = 0.1;            % MPC Time horizon (prev 13)
 
     xmeasure = [x1 x2,x3,x4];      % state
-    u0   = 0.6*ones(1,N);    % initial input guess - [u(N), beta]
-    beta0   = 0.6;           % initial input guess - [u(N), beta]
+    u0   = 0.1*ones(1,N);    % initial input guess - [u(N), beta]
+    beta1i   = 0.6;           % beta - min constraint
+    beta2i   = 0.6;           % beta - min constraint
 
 %==========================================================================    
 %   Cost function
@@ -25,8 +26,8 @@ function [xout,u_new,exitflag] = smpc2_4d(x1,x2,x3,x4,xt)
 %   SMPC settings
 %==========================================================================    
 
-    sig = 0.05*0.5;        % covariance matrix with sigma^2 (here: uncertainty considered)
-    x1_limit = [-0.08,0.08]; 
+    sig = 0.05;        % covariance matrix with sigma^2 (here: uncertainty considered)
+    x1_limit = [-0.10,0.12]; 
     state = 1;        % 1,2,3,4 - position,velocity,acceleration,jerk
 
 %==========================================================================    
@@ -106,12 +107,12 @@ function [xout,u_new,exitflag] = smpc2_4d(x1,x2,x3,x4,xt)
     [u_new, V_current, exitflag, output] = solveOptimalControlProblem ...
         (@runningcosts, @constraints, ...
         @system, @cov_propagation, ...
-        N, xmeasure, [u0,beta0], Th, ...
+        N, xmeasure, [u0,beta1i,beta2i], Th, ...
         sig, params, ...
         options);
 
 
-    xout = computeOpenloopSolution(@system, N, Th, xmeasure, u_new(1:end-1), ...
+    xout = computeOpenloopSolution(@system, N, Th, xmeasure, u_new(1:end-2), ...
                                          sig, params);
 
 end
@@ -125,8 +126,9 @@ function [u, V, exitflag, output] = solveOptimalControlProblem ...
     system, cov_propagation, N, x0, ubeta, Th, sig, params, ...
     options)
     
-    u0 = ubeta(1:end-1);
-    beta0 = ubeta(end);
+    u0 = ubeta(1:end-2);
+    beta1i = ubeta(end-1);
+    beta2i = ubeta(end);
     
     x = zeros(N+1, length(x0));
     x = computeOpenloopSolution(system, N, Th, x0, u0, ...
@@ -144,7 +146,7 @@ function [u, V, exitflag, output] = solveOptimalControlProblem ...
     % Solve optimization problem
     % tic
     [u, V, exitflag, output] = fmincon(@(u) costfunction(runningcosts, system, N, Th, x0, u, sig, params), ...
-        [u0,beta0], ...
+        [u0,beta1i,beta2i], ...
         A, b, Aeq, beq, lb, ub, ...
         @(u) nonlinearconstraints(constraints, system, cov_propagation, N, Th, x0, u, sig, params), options);
     % toc
@@ -161,16 +163,16 @@ function cost = costfunction(runningcosts, system, ...
                     N, Th, x0, u, ...
                     sig, params)
     cost = 0;
+    beta1 = u(end-1);
+    beta2 = u(end);
 
-
-    beta = u(end);
     x = zeros(N+1, length(x0));
     x = computeOpenloopSolution(system, N, Th, x0, u, ...
                                 sig, params);
     for k=1:N
         cost = cost+runningcosts(x(k,:), u(:,k),params);
     end
-    cost = cost-beta;
+    cost = cost-beta1-beta2;
 end
 
 %==========================================================================
@@ -181,7 +183,8 @@ function [c,ceq] = nonlinearconstraints(constraints, ...
     system, cov_propagation, ...
     N, Th, x0, u, sig, params)
 
-    beta = u(end);
+    beta1 = u(end-1);
+    beta2 = u(end);
 
     x = zeros(N+1, length(x0));
     x = computeOpenloopSolution(system, N, Th, x0, u, ...
@@ -206,11 +209,11 @@ function [c,ceq] = nonlinearconstraints(constraints, ...
 
     K = [0,0,0,0];
     
-    umax = 2.0;
+    umax = 1.0;
 
     for k=1:N               
-        gamma1 = sqrt(2*g1'*sigma_e(:,:,k)*g1)*erfinv(2*beta-1);                   % constraint tightening
-        gamma2 = sqrt(2*g2'*sigma_e(:,:,k)*g2)*erfinv(2*beta-1);                   % constraint tightening
+        gamma1 = sqrt(2*g1'*sigma_e(:,:,k)*g1)*erfinv(2*beta1-1);                   % constraint tightening
+        gamma2 = sqrt(2*g2'*sigma_e(:,:,k)*g2)*erfinv(2*beta2-1);                   % constraint tightening
         [cnew, ceqnew] = constraints(x(k,:),u(:,k), gamma1, gamma2, K, params);   % generate constraints
 
         c(end+1) = u(k) - umax;
@@ -220,6 +223,10 @@ function [c,ceq] = nonlinearconstraints(constraints, ...
         c = [c cnew];
         ceq = [ceq ceqnew];
     end
+
+    c(end+1) = u(end-1) - 1.0;
+    c(end+1) = -u(end-1) + 0.5;    
+
     c(end+1) = u(end) - 1.0;
     c(end+1) = -u(end) + 0.5;
 

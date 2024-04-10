@@ -1,10 +1,10 @@
 clc;clear;close all;
 
-M = readmatrix("data/smpc_v2_2024_04_08-06_12_15_PM.csv");
-videoname = '/home/orl/Downloads/homecart_misc/videos/out_04_08_2024_1812.avi';
-numFrames = 24-1;
-prefix = '/home/orl/Downloads/vid2pix/smpcv2_t3/frame';
-pt = -0.002500360075771748;
+M = readmatrix("data/smpc_v2_2024_04_09-08_48_43_PM.csv");
+videoname = '/home/orl/Downloads/homecart_misc/videos/out_04_09_2024_2053.avi';
+numFrames = 21-1;
+prefix = '/home/orl/Downloads/vid2pix/smpcv2_t8/frame';
+pt = 0.0005930065738119931;
 
 
 Nodes = 10;
@@ -92,7 +92,7 @@ set(gcf, 'Position', get(0, 'Screensize'));
 pause(.1)
 
 writerObj = VideoWriter(videoname); % Name it.
-writerObj.FrameRate = 19; % How many frames per second.
+writerObj.FrameRate = 10; % How many frames per second.
 open(writerObj);
 
 
