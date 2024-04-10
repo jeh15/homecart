@@ -19,13 +19,13 @@ function [xout,u_new,exitflag] = smpc2_4d(x1,x2,x3,x4,xt)
                  0 .1  0  0;
                  0  0 .1  0;
                  0  0  0 .1];
-    costR = 1e-8;        % last 1e-2
+    costR = 1e-2;        % last 1e-8
 
 %==========================================================================    
 %   SMPC settings
 %==========================================================================    
 
-    sig = 0.05*0.5;        % covariance matrix with sigma^2 (here: uncertainty considered)
+    sig = 0.05*50;  %10x   % covariance matrix with sigma^2 (here: uncertainty considered)
     x1_limit = [-0.08,0.08]; 
     state = 1;        % 1,2,3,4 - position,velocity,acceleration,jerk
 
