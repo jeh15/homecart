@@ -206,7 +206,10 @@ function [c,ceq] = nonlinearconstraints(constraints, ...
 
     K = [0,0,0,0];
     
-    umax = 2.0;
+    umax = 10.0;
+
+    betamax = 1.0;
+    betamin = 0.5;
 
     for k=1:N               
         gamma1 = sqrt(2*g1'*sigma_e(:,:,k)*g1)*erfinv(2*beta-1);                   % constraint tightening
@@ -220,8 +223,8 @@ function [c,ceq] = nonlinearconstraints(constraints, ...
         c = [c cnew];
         ceq = [ceq ceqnew];
     end
-    c(end+1) = u(end) - 1.0;
-    c(end+1) = -u(end) + 0.5;
+    c(end+1) =  u(end) - betamax;
+    c(end+1) = -u(end) + betamin;
 
 
     c = [c cnew];
