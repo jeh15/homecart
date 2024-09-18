@@ -333,9 +333,9 @@ try:
 
             board_pos_data = np.append(board_pos_data, board_pos - original_pose)
             board_vel_data = np.append(board_vel_data, board_vel)
-
+            
             k_model = slope(board_pos_data,kf2_acc_data) # slope(x,y) => m = y/x = ddx/th
-            k_clip = np.clip(k_model, k_model_min, k_model_max)
+            # k_clip = np.clip(k_model, k_model_min, k_model_max)
             k_model_data = np.append(k_model_data, k_model)
 
             # get target velocity

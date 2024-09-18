@@ -1,10 +1,10 @@
 clc;clear;close all;
 
-M = readmatrix("data/smpc_v2_2024_04_11-05_39_29_PM.csv");
-videoname = '/home/orl/Downloads/homecart_misc/videos/out_04_11_2024_1741.avi';
-numFrames = 61-1;
-prefix = '/home/orl/Downloads/vid2pix/smpcv2_t21/frame';
-pt = -0.002653936834228716;
+M = readmatrix("data/smpc_v2_betadv_2024_04_26-02_47_19_PM.csv");
+videoname = '/home/orl/Downloads/homecart_misc/videos/out_04_26_2024_1451_superlow.avi';
+numFrames = 219-1;
+prefix = '/home/orl/Downloads/vid2pix/smpc_superlowsig/frame';
+pt = -0.0012602609714489211;
 
 
 Nodes = 10;
@@ -95,6 +95,8 @@ writerObj = VideoWriter(videoname); % Name it.
 writerObj.FrameRate = 10; % How many frames per second.
 open(writerObj);
 
+% array to plot beta
+beta_array = [];
 
 for i=1:numFrames+1
     % i=83;
@@ -105,7 +107,15 @@ for i=1:numFrames+1
     % generate x traj
     x0 = [ball_pos(i), ball_vel(i), ball_acc(i), ball_jerk(i)]';
 
-    [x_traj,u_traj] = smpc2_4d(ball_pos(i), ball_vel(i), ball_acc(i), ball_jerk(i),pt);
+    [x_traj,u_traj,exitflag] = smpc2_4d(ball_pos(i), ball_vel(i), ball_acc(i), ball_jerk(i),pt);
+    disp(exitflag)
+    if (exitflag <=0)
+        disp(strcat(num2str(i),'-- optim failed { 0 : itermax // -2 : no feasible point found } -> ',num2str(exitflag)))
+        % fails = [fails, mpciter];
+    end
+    
+    beta_array = [beta_array,u_traj(end)];
+    
     
     % x_traj = out(:,1:end-1);
     % u_traj = out(:,end);
@@ -194,7 +204,10 @@ for i=1:numFrames+1
     ax.FontSize = 16;
 
 
-    subplot(4,2,[2 4])
+
+% ===== control input traj ====    
+
+    subplot(4,2,2)
     % subplot(1,2,2)
     plot(time(1:i),target_vel(1:i),'.-b',"MarkerSize",12)
     hold on
@@ -211,6 +224,22 @@ for i=1:numFrames+1
     ax = gca;
     ax.FontSize = 16;
 
+
+
+% ===== beta ====    
+
+
+    subplot(4,2,4)
+    plot(time(1:i),beta_array,'.-b',"MarkerSize",12)
+    xlim(xlarm)
+    ylim([-0.1,1.1])        
+    ylabel('beta',"FontSize",16)
+    title('beta',"FontSize",22)
+    xlabel('Time(s)',"FontSize",16)    
+    ax = gca;
+    ax.FontSize = 16;
+    
+
     subplot(4,2,[6 8])
     imshow(pics{i})
 
@@ -223,7 +252,7 @@ for i=1:numFrames+1
     
 
     pause(delay)
-    disp(i)
-    disp(u_traj(end))
+    % disp(i)
+    % disp(u_traj(end))
 end
 close(writerObj);

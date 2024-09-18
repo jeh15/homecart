@@ -6,10 +6,10 @@ addpath(genpath([pwd '/JW_MPC_bbm_learn/Functions']))
 
 %% Input Parameters
 % Time Variables
-Th = 2*0.33;          % Time Horizon (lookahead time)
+Th = 0.33;          % Time Horizon (lookahead time)
 
 % Problem Nodes
-Nodes = 2*10;
+Nodes = 10;
 
 
 % Position Upper/Lower Bounds - [x; y; z], [max, min]
@@ -91,7 +91,7 @@ K = m*g / (m+(Jz/rr^2));
 Ad = [0 1 0 0;
       0 0 K 0;
       0 0 0 1;
-      0 0 0 -15]; % originally -31 newish -17 BETTER = -15
+      0 0 0 -15] % originally -31 newish -17 BETTER = -15
 %REASSIGNED IN CONSTRAINTS
 
 Bd = [ 0 ;
@@ -101,7 +101,8 @@ Bd = [ 0 ;
 
 
 % u - board ang vel step -> equivalent to board-ang-acc = max-step / dt = 0.5/(0.033)
-du_max = 0.25; % original 0.5, updated 0.25 
+% du_max = 0.25; % original 0.5, updated 0.25 
+du_max = 0.5*10; % original 0.5, updated 0.25 
 % du_max = 0.3;
 
 %% Setup the Problem Objectives and Constraints

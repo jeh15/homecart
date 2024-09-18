@@ -6,10 +6,10 @@ addpath(genpath([pwd '/MPC6/Functions']))
 
 %% Input Parameters
 % Time Variables
-Th = 2*0.33;          % Time Horizon (lookahead time)
+Th = 0.33;          % Time Horizon (lookahead time)
 
 % Problem Nodes
-Nodes = 2*10;
+Nodes = 10;
 
 
 % Position Upper/Lower Bounds - [x; y; z], [max, min]
@@ -40,8 +40,8 @@ Q = 2*0.2*[2 0     0        0;
            0 0     0        0.000001];
 
 
-R = eye(dims_v).*0.01;
-% R = eye(dims_v).*0.000001; --original
+% R = eye(dims_v).*0.01;
+R = eye(dims_v).*0.000001; %--original
 
 % Drone Properites
 m = 0.032;       % kg

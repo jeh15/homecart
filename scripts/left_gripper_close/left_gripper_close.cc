@@ -33,7 +33,7 @@ int main(int argc, char* argv[]){
     // Gripper Command Template:
     lcmt_schunk_wsg_command schunk_command;
     // schunk_command.target_position_mm = 38;
-    schunk_command.target_position_mm = 1;
+    schunk_command.target_position_mm = 0;
     schunk_command.force = 100;
 
 
